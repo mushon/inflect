@@ -1,0 +1,31 @@
+name: E2E (Puppeteer)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Run Puppeteer E2E
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: '0'
+        run: |
+          npm run test:iframe

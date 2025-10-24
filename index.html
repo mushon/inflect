@@ -102,6 +102,18 @@
             } catch (e) { /* swallow */ }
         };
     // Track last path (excluding hash)
+    // Normalize paths for robust comparison of relative vs absolute hrefs
+    function __normalizePathOnly(href) {
+        try {
+            const u = new URL(href, window.location.href);
+            u.hash = '';
+            // remove trailing slash on non-root paths for stable comparisons
+            if (u.pathname && u.pathname.length > 1 && u.pathname.endsWith('/')) u.pathname = u.pathname.replace(/\/+$/, '');
+            return u.href;
+        } catch (e) {
+            return href;
+        }
+    }
     let lastIframePath = null;
     let firstFrame = true;
     const iframe = document.getElementById('if');
@@ -120,9 +132,42 @@
 
         // Fade in once the iframe finishes loading. We only change the iframe's
         // opacity; do not modify the body's background or any other color.
+        // Also clear any pending requested-href so retry logic won't reassign.
+        let __lastRequestedIframeHref = null;
         iframe.addEventListener('load', () => {
-            iframe.style.opacity = '1';
-        });
+                iframe.style.opacity = '1';
+                try { __lastRequestedIframeHref = null; } catch(e){}
+            });
+
+        // Helper to assign iframe.src and schedule one gentle retry in case
+        // the browser ignored the first assignment (some environments normalize
+        // hrefs or suppress re-navigation). We retry only once to avoid loops.
+        function __assignIframeSrcOnce(href, delay = 0, skipRetry = false) {
+            try {
+                if (delay) {
+                    setTimeout(() => {
+                        try { iframe.src = href; __lastRequestedIframeHref = href; } catch(e){}
+                    }, delay);
+                } else {
+                    iframe.src = href; __lastRequestedIframeHref = href;
+                }
+
+                // For hash-only navigations, the iframe doesn't fire 'load'.
+                // In that case, skip the retry mechanism to avoid stomping newer
+                // hash updates and generating noisy logs.
+                if (!skipRetry) {
+                    // schedule a single retry if load hasn't happened
+                    setTimeout(() => {
+                        try {
+                            if (__lastRequestedIframeHref === href) {
+                                try { if (window && window.__inflectDebug) console.debug('setIframeIfPathChanged: retrying iframe.src ->', href); } catch(e){}
+                                try { iframe.src = href; __lastRequestedIframeHref = href + '|retried'; } catch(e){}
+                            }
+                        } catch(e) { /* swallow */ }
+                    }, 1200);
+                }
+            } catch (e) { /* swallow */ }
+        }
 
     // Function to fetch and render the markdown
     async function renderMarkdown() {
@@ -508,28 +553,28 @@
     // Update markdown when hash changes
         // Fade in new content only on path change
         function setIframeIfPathChanged(newHref) {
-            const parsedURL = new URL(newHref, window.location.origin);
+            // Resolve the new href against the current document location so
+            // relative links (e.g. "vid/foo#bar") normalize correctly.
+            const parsedURL = new URL(newHref, window.location.href);
             const originalHash = parsedURL.hash || '';
-            // compute path-only URL for comparison
-            const pathOnly = new URL(parsedURL.href);
-            pathOnly.hash = '';
-            const newPath = pathOnly.href;
+            // compute path-only URL for comparison using normalized helper
+            const newPath = __normalizePathOnly(parsedURL.href);
 
             if (newPath !== lastIframePath) {
                 if (firstFrame) {
                     firstFrame = false;
                     iframe.style.opacity = '1';
-                    iframe.src = newHref;
+                    __assignIframeSrcOnce(newHref, 0, false);
                 } else {
                     if (iframe.style.opacity !== '0') {
                         // Only fade the iframe itself to transparent; do not touch
                         // the body's background color.
                         iframe.style.opacity = '0';
                         setTimeout(() => {
-                            iframe.src = newHref;
+                            __assignIframeSrcOnce(newHref, 0, false);
                         }, 400); // match transition duration
                     } else {
-                        iframe.src = newHref;
+                        __assignIframeSrcOnce(newHref, 0, false);
                     }
                 }
                 lastIframePath = newPath;
@@ -537,7 +582,7 @@
                 // Only hash changed — assign src to force the iframe to pick up the
                 // full hash token. This is more robust and avoids cross-window
                 // access issues in browsers/environments used in tests.
-                iframe.src = newHref;
+                __assignIframeSrcOnce(newHref, 0, true);
             }
         }
 
