@@ -588,7 +588,7 @@
 
         // Schedule iframe updates slightly later to allow DOM mutations (e.g. typewriter)
         let __iframeNextTimeout = null;
-        function setIframeNext(href, delay = 60, waitForSection = true){
+        function setIframeNext(href, delay = 60, waitForSection = false, targetSection = null){
             try { if (__iframeNextTimeout) clearTimeout(__iframeNextTimeout); } catch(e){}
             __iframeNextTimeout = setTimeout(() => {
                 // Try to find the anchor in the document and its containing section
@@ -614,17 +614,24 @@
                             if (sec && sec.getAttribute('data-tw-active') === '1') {
                                 // wait for typewriter:done (event), fallback to timeout
                                 let done = false;
-                                const onDone = () => { if (!done) { done = true; try { sec.removeEventListener('typewriter:done', onDone); } catch(e){}; setIframeIfPathChanged(href); __iframeNextTimeout = null; } };
+                                const onDone = () => { if (!done) { done = true; try { sec.removeEventListener('typewriter:done', onDone); } catch(e){}; setIframeIfPathChanged(href); try { const tgt = targetSection || sec; if (tgt) { try { tgt.dataset._iframeAssigned = String(Date.now()); } catch(e){}; try { tgt.dispatchEvent(new CustomEvent('inflect:iframe:assigned', { bubbles: false, detail: { href } })); } catch(e){} } } catch(e){}; __iframeNextTimeout = null; } };
                                 try { sec.addEventListener('typewriter:done', onDone); } catch(e){}
                                 try { if (window && window.__inflectDebug) console.debug('setIframeNext waiting for typewriter:done on', sec); } catch(e){}
                                 const maxWait = 1400;
-                                setTimeout(() => { if (!done) { done = true; try { sec.removeEventListener('typewriter:done', onDone); } catch(e){}; try { if (window && window.__inflectDebug) console.debug('setIframeNext timeout while waiting for', sec); } catch(e){}; setIframeIfPathChanged(href); __iframeNextTimeout = null; } }, maxWait);
+                                setTimeout(() => { if (!done) { done = true; try { sec.removeEventListener('typewriter:done', onDone); } catch(e){}; try { if (window && window.__inflectDebug) console.debug('setIframeNext timeout while waiting for', sec); } catch(e){}; setIframeIfPathChanged(href); try { const tgt = targetSection || sec; if (tgt) { try { tgt.dataset._iframeAssigned = String(Date.now()); } catch(e){}; try { tgt.dispatchEvent(new CustomEvent('inflect:iframe:assigned', { bubbles: false, detail: { href } })); } catch(e){} } } catch(e){}; __iframeNextTimeout = null; } }, maxWait);
                                 return;
                             }
                         }
                     }
                 } catch(e) { /* swallow */ }
                 try { setIframeIfPathChanged(href); } catch(e){}
+                try {
+                    const tgt = targetSection;
+                    if (tgt) {
+                        try { tgt.dataset._iframeAssigned = String(Date.now()); } catch(e){}
+                        try { tgt.dispatchEvent(new CustomEvent('inflect:iframe:assigned', { bubbles: false, detail: { href } })); } catch(e){}
+                    }
+                } catch(e){}
                 __iframeNextTimeout = null;
             }, delay);
         }
@@ -660,13 +667,11 @@
                         // Use the raw href attribute to avoid races where scripts
                         // (e.g. the typewriter) mutate link textContent or href.
                         const rawHref = visibleLink.getAttribute('href');
-                        try { const full = new URL(rawHref, window.location.href).href; setIframeNext(full); } catch(e){ setIframeNext(visibleLink.href); }
-                        // Start any typewriter animation for the section that contains this link
-                        // after the iframe has been asked to load the path. Use a short delay
-                        // to allow the iframe transition to start.
                         try {
                             const section = visibleLink.closest('section') || document.querySelector('main');
-                            // (typewriter removed)
+                            const raw = rawHref;
+                            try { const full = new URL(raw, window.location.href).href; setIframeNext(full, 60, false, section); }
+                            catch(e){ setIframeNext(visibleLink.href, 60, false, section); }
                         } catch (e) { /* swallow */ }
                     }
                 }
@@ -727,7 +732,7 @@
                             } catch (e) { /* swallow */ }
                         }
 
-                        try { const full = new URL(raw, window.location.href).href; setIframeNext(full); } catch(e){ setIframeNext(a.href); }
+                        try { const full = new URL(raw, window.location.href).href; setIframeNext(full, 60, false, sec); } catch(e){ setIframeNext(a.href, 60, false, sec); }
                     } catch(e) { /* swallow */ }
                     sectionObserver.unobserve(en.target);
                 }

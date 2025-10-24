@@ -319,8 +319,26 @@
       if (en.isIntersecting) {
         try {
           const sec = en.target;
-          const els = sec.querySelectorAll('.typewriter');
-          els.forEach(el => startTypingForElement(el));
+          try { sec.setAttribute('data-tw-active', '1'); } catch(e){}
+          const els = Array.from(sec.querySelectorAll('.typewriter'));
+          // If the section has an inflection link, wait until iframe assignment
+          const hasInflectLink = !!(sec.querySelector('a:not(.dontinflect)[href]'));
+          const alreadyAssigned = !!sec.dataset._iframeAssigned;
+          if (els.length) {
+            if (hasInflectLink && !alreadyAssigned) {
+              let started = false;
+              const startAll = () => {
+                if (started) return; started = true;
+                try { els.forEach(el => startTypingForElement(el)); } catch(e){}
+              };
+              const onAssigned = () => { try { sec.removeEventListener('inflect:iframe:assigned', onAssigned); } catch(e){}; startAll(); };
+              try { sec.addEventListener('inflect:iframe:assigned', onAssigned, { once: true }); } catch(e){}
+              // Fallback timeout in case event never fires
+              setTimeout(startAll, 1500);
+            } else {
+              els.forEach(el => startTypingForElement(el));
+            }
+          }
         } catch (e) { /* swallow */ }
         sectionObserver.unobserve(en.target);
       }
