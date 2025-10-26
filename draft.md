@@ -5,7 +5,7 @@ css: src/theme.css
 
 # _המסע של_ ניבאל אל היסי
 
-[](svg/#opening.svg)
+[](svg/#opening.svg/~IDFareas)
 
 <img src="img/bts_logo.svg" alt="בצלם: מסעות עקירה]" style="max-width:100px;height:auto;">
 
