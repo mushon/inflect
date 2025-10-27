@@ -17,6 +17,10 @@
     font-style: normal;
     font-weight: regular;
 }
+/* Hide paragraphs that contain only a single empty anchor element */
+p:has(> a:only-child:empty) {
+    display: none;
+}
 
 html, body {
     font-family: 'David Libre', serif;
