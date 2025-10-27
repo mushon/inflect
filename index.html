@@ -144,7 +144,8 @@
         window.__renderMarkdownRunning = true;
         try {
             const hash = window.location.hash.substring(1); // Remove '#' from hash
-            const file = hash ? hash : 'README';
+            // Strip :number suffix (e.g., 'draft:36' -> 'draft') for section jumping
+            const file = hash ? hash.replace(/:\d+$/, '') : 'README';
 
             var title = document.title.split(" · ")[0];
             document.title = (file === "README") 

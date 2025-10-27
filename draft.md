@@ -95,6 +95,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## 7 באוקטובר 2023 
 
 
@@ -157,6 +158,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## המסע דרומה  
 
 
@@ -223,6 +225,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## ההפצצה הראשונה: המחסן באל-בוריג׳ 
 
 
@@ -301,6 +304,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## הפסקת האש: שביב של תקווה 
 
 
@@ -345,6 +349,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## ההפצצה השנייה: בית אחותה 
 
 
@@ -367,6 +372,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## ההפצצה השלישית: בית המשפחה 
 
 
@@ -391,6 +397,7 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## ארעיות קבועה 
 
 
@@ -438,4 +445,5 @@ css: src/theme.css
 
 
 {.subheader}
+[]()
 ## קרדיטים

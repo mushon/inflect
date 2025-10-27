@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
       label.textContent = chapterTitle;
 
       chapterBtn.addEventListener('click', createScrollHandler(h.id));
+      chapterBtn.addEventListener('dblclick', createDoubleClickHandler(h.id));
 
       chapterItem.appendChild(chapterBtn);
       chapterItem.appendChild(label);
@@ -145,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
         sectionLabel.textContent = chapterTitle;
 
         sectionBtn.addEventListener('click', createScrollHandler(section.id));
+        sectionBtn.addEventListener('dblclick', createDoubleClickHandler(section.id));
 
         sectionItem.appendChild(sectionBtn);
         sectionItem.appendChild(sectionLabel);
@@ -244,6 +246,33 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (e) { /* non-fatal */ }
 
+    // Helper function to update hash with section number
+    function updateHashWithSection(targetId) {
+      // Extract section number from IDs like 'section-36'
+      const match = targetId.match(/section-(\d+)$/);
+      if (!match) return;
+      
+      const sectionNum = match[1];
+      const currentHash = window.location.hash;
+      
+      // Get current page/prefix (e.g., 'draft' from '#draft' or '#draft:10')
+      let prefix = '';
+      if (currentHash) {
+        const prefixMatch = currentHash.match(/^#([^:]+)/);
+        if (prefixMatch) {
+          prefix = prefixMatch[1];
+          // Remove any existing :number suffix
+          prefix = prefix.replace(/:\d+$/, '');
+        }
+      }
+      
+      // Build new hash
+      const newHash = prefix ? `#${prefix}:${sectionNum}` : `#:${sectionNum}`;
+      
+      console.log('[chapters] Double-click: updating hash to', newHash);
+      window.location.hash = newHash;
+    }
+
     // Helper function to create scroll handler
     function createScrollHandler(targetId) {
       return function(ev) {
@@ -289,6 +318,14 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => { window.__chaptersAnimating = false; }, 1000);
           } catch (e) { /* swallow */ }
         }
+      };
+    }
+
+    // Helper function to create double-click handler for hash updates
+    function createDoubleClickHandler(targetId) {
+      return function(ev) {
+        ev.preventDefault();
+        updateHashWithSection(targetId);
       };
     }
 
@@ -467,4 +504,66 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 120);
   });
   mo.observe(main, { childList: true, subtree: true });
+
+  // Hash-based section jumping: detect patterns like #draft:36 or #:36
+  function handleHashJump() {
+    const hash = window.location.hash;
+    if (!hash) return;
+    
+    // Match patterns like #:36 or #draft:36 or #anything:123
+    const match = hash.match(/:(\d+)$/);
+    if (!match) return;
+    
+    const sectionNum = parseInt(match[1], 10);
+    const targetId = 'section-' + sectionNum;
+    const target = document.getElementById(targetId);
+    
+    if (!target) {
+      console.warn('[chapters] Section not found:', targetId);
+      return;
+    }
+    
+    console.log('[chapters] Jumping to section:', targetId);
+    
+    // Use the same scroll logic as the nav buttons
+    window.__snapSuppressUntil = Date.now() + 1500;
+    window.__chaptersAnimating = true;
+    
+    const scroller = document.querySelector('main') || document.scrollingElement || document.documentElement;
+    const viewportHeight = scroller.clientHeight || window.innerHeight;
+    const targetTop = target.getBoundingClientRect().top + (scroller.scrollTop || window.pageYOffset);
+    const centeredTop = targetTop - (viewportHeight / 2) + (target.offsetHeight / 2);
+    
+    if (window.__smoothScrollTo) {
+      try {
+        window.__smoothScrollTo(scroller, centeredTop, { source: 'hash' });
+      } catch (e) {
+        try {
+          if (scroller === document.scrollingElement || scroller === document.documentElement) {
+            window.scrollTo({ top: centeredTop, behavior: 'smooth' });
+          } else {
+            scroller.scrollTo({ top: centeredTop, behavior: 'smooth' });
+          }
+          setTimeout(() => { window.__chaptersAnimating = false; }, 1000);
+        } catch (e) { /* swallow */ }
+      }
+    } else {
+      try {
+        if (scroller === document.scrollingElement || scroller === document.documentElement) {
+          window.scrollTo({ top: centeredTop, behavior: 'smooth' });
+        } else {
+          scroller.scrollTo({ top: centeredTop, behavior: 'smooth' });
+        }
+        setTimeout(() => { window.__chaptersAnimating = false; }, 1000);
+      } catch (e) { /* swallow */ }
+    }
+  }
+
+  // Listen for hash changes
+  window.addEventListener('hashchange', handleHashJump);
+  
+  // Handle initial hash on page load (with a delay to ensure content is ready)
+  setTimeout(() => {
+    handleHashJump();
+  }, 500);
 });
