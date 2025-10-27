@@ -87,12 +87,13 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
+
 ## 7 באוקטובר 2023 
 
 
 {.meta} 
-[](map/#31.42291,34.38571,9.83,37.6,0.0/+oct7_23)
+[](map/#31.42291,34.38571,9.83,37.6,0.0/+oct7_23_hamas(skull))
 ב-7 באוקטובר 2023 מבצעים ארגון חמאס ופלגים חמושים פלסטינים נוספים מרצועת עזה את המתקפה הקטלנית ביותר שהתרחשה אי פעם נגד אזרחים ישראלים.
 
 
@@ -150,7 +151,7 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## המסע דרומה  
 
 
@@ -218,7 +219,7 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## ההפצצה הראשונה: המחסן באל-בוריג׳ 
 
 
@@ -303,7 +304,7 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## הפסקת האש: שביב של תקווה 
 
 
@@ -351,7 +352,7 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## ההפצצה השנייה: בית אחותה 
 
 
@@ -376,7 +377,7 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## ההפצצה השלישית: בית המשפחה 
 
 
@@ -403,7 +404,7 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## ארעיות קבועה 
 
 
@@ -452,5 +453,5 @@ css: src/theme.css
 
 
 {.subheader}
-[]()
+[](about:blank)
 ## קרדיטים

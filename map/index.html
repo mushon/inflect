@@ -25,6 +25,8 @@
   </style>
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <!-- Mapbox RTL Text Plugin for right-to-left text support (Arabic, Hebrew, etc.) -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js"></script>
   <!-- Removed any Python-in-the-browser scripts (e.g., Pyodide, Brython) to prevent py.parse errors -->
   <!-- Add JSZip and togeojson for KMZ/KML support -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -45,6 +47,13 @@ if (window.self !== window.top) {
 }
 // Sample Mapbox access token (replace with your own for production)
 mapboxgl.accessToken = 'pk.eyJ1IjoibXVzaG9uIiwiYSI6ImNtOGVhMWFkZTJqOGkyanI3aHJzaG11N3oifQ.gU_FaxkjsMZqUbFQedDSJA';
+
+// Enable RTL text plugin for proper display of Arabic, Hebrew, and other RTL languages
+mapboxgl.setRTLTextPlugin(
+  'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
+  null,
+  true // lazy load - only loads when needed
+);
 
 // Sample style
 const style = 'mapbox://styles/mushon/cmg0uv6tl00jn01qy6ruzhg29/draft';
