@@ -17,9 +17,13 @@
     font-style: normal;
     font-weight: regular;
 }
-/* Hide paragraphs that contain only a single empty anchor element */
-p:has(> a:only-child:empty) {
-    display: none;
+/* Hide paragraphs that contain only a single empty anchor element with no other content */
+p.no-text {
+    padding: 0;
+}
+
+p.no-text a {
+    height: 0;
 }
 
 html, body {

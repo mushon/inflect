@@ -33,7 +33,7 @@ css: src/theme.css
 
 
 {.subheader}
-[](svg/#opening.svg/-0.06,-0.05,2.05/~opening)
+[](about:blank)
 
 ## החיים שלפני
 
@@ -57,13 +57,13 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130641184%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130641184/autoplay,loop)
 
 אחרי התיכון, המשכתי ללימודי אנגלית ותרגום באוניברסיטת אל-אזהר.
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130634353%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130634353/autoplay,loop)
 
 בשנה האחרונה באוניברסיטה הכרתי את אחמד. הרגשתי שהוא דומה לי, שהוא מבין אותי. 
 

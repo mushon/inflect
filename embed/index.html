@@ -610,17 +610,94 @@
     // ignore hash updates while the user is manipulating the embed
     if(isManipulating) return;
     const s = parseHash();
-    applyStateToUI(s);
-    // echo immediately so the UI reflects the hash even before embed loads
-    echoStateImmediately(s);
-    // Only reload the embed if the URL actually changed. Avoid reloading the same
-    // URL which would re-inject and reset the current transform after user
-    // manipulation finishes and we flush the hash.
-    try{
+    
+    try {
       const cur = (urlIn && urlIn.value) ? urlIn.value.trim() : '';
       const parsedUrl = s.url ? s.url.trim() : '';
-      if(parsedUrl && parsedUrl !== cur){ loadUrl(parsedUrl); }
-    }catch(e){}
+      
+      // Normalize both URLs for comparison (handle encoding differences)
+      const normalizUrl = (u) => {
+        try {
+          if (!u) return '';
+          // Expand and then parse to normalize
+          const expanded = expandUrlFromHash(u);
+          const url = new URL(expanded, location.href);
+          return url.href.toLowerCase();
+        } catch(e) {
+          return String(u || '').toLowerCase();
+        }
+      };
+      
+      const normalizedCur = normalizUrl(cur);
+      const normalizedParsed = normalizUrl(parsedUrl);
+      const urlChanged = normalizedParsed && (normalizedCur !== normalizedParsed);
+
+      // Apply state to UI and echo immediately
+      applyStateToUI(s);
+      echoStateImmediately(s);
+
+      // If URL changed, always reload
+      if(urlChanged){
+        if(parsedUrl){ loadUrl(parsedUrl); }
+        return;
+      }
+
+      // URL hasn't changed - update parameters in place
+      // If using PlayerAdapter, apply state directly
+      if(playerMode && playerAdapter && parsedUrl){
+        try{ 
+          applyPlayerState(s); 
+          // Also update transform if s/x/y changed
+          if(typeof s.s !== 'undefined' || typeof s.x !== 'undefined' || typeof s.y !== 'undefined'){
+            applyOrQueueState(s);
+          }
+        }catch(e){ console.warn('applyPlayerState failed', e); }
+        return;
+      }
+
+      // If an iframe is currently injected, reload it with updated parameters
+      try{
+        const wrap = injected.firstElementChild;
+        const iframe = wrap && wrap.querySelector && wrap.querySelector('iframe');
+        if(iframe && parsedUrl){
+          // Force reload with new parameters by reconstructing and reassigning src
+          try{
+            let newSrc = parsedUrl; // Start fresh from the base URL
+            if(isVimeoUrl(newSrc)) {
+              newSrc = patchVimeoParams(newSrc, {autoplay: !!s.autoplay, loop: !!s.loop});
+            } else {
+              try{ 
+                const u = new URL(newSrc, location.href); 
+                if(s.autoplay) { 
+                  u.searchParams.set('autoplay','1'); 
+                  u.searchParams.set('mute','1'); 
+                } else { 
+                  u.searchParams.delete('autoplay'); 
+                }
+                if(s.loop) {
+                  u.searchParams.set('loop','1'); 
+                } else { 
+                  u.searchParams.delete('loop'); 
+                }
+                newSrc = u.toString(); 
+              }catch(e){ /* ignore URL ctor errors */ }
+            }
+            // Force reload by changing src (even if it appears the same, params may have changed)
+            iframe.src = newSrc;
+            // ensure allow attribute includes autoplay
+            try{ iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture'); }catch(e){}
+            // Update transform if s/x/y changed
+            if(typeof s.s !== 'undefined' || typeof s.x !== 'undefined' || typeof s.y !== 'undefined'){
+              applyOrQueueState(s);
+            }
+            return;
+          }catch(e){ console.warn('iframe src update failed', e); }
+        }
+      }catch(e){}
+
+      // Fallback: if we have a URL, load it
+      if(parsedUrl){ loadUrl(parsedUrl); }
+    } catch (e) { console.warn('hashchange handler error', e); }
   });
 
   function findProvider(url){
