@@ -62,13 +62,13 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130641184%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130641184/autoplay,loop)
 
 אחרי התיכון, המשכתי ללימודי אנגלית ותרגום באוניברסיטת אל-אזהר.
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130634353%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130634353/autoplay,loop)
 
 בשנה האחרונה באוניברסיטה הכרתי את אחמד. הרגשתי שהוא דומה לי, שהוא מבין אותי. 
 
@@ -76,7 +76,7 @@ css: src/theme.css
 
 
 {.meta}
-[](map/#31.52929,34.47915,15.50,37.6,0.0/+jabalia)
+[](map/#31.53387,34.48216,17.64,28.8,52.0/+jabalia,+satellite,~bridge-simple,~bridge-case-simple,~road-simple,~tunnel-simple)
 בספטמבר 2022 ניבאל ואחמד מתחתנים ועוברים להתגורר בג׳אבליא, בקרבת בית משפחתה של ניבאל.
 
 
@@ -88,7 +88,7 @@ css: src/theme.css
 
 
 {.meta}
-[](embed/#vimeo.com%2F1130634480%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130634480/autoplay,loop)
 שנה אחרי החתונה, בספטמבר 2023, נולדת התינוקת הראשונה שלהם, ריתא. 
 
 חמישה ימים לאחר לידתה, אחמד מקבל היתר עבודה בישראל ומתחיל לעבוד בבניין.
