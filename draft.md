@@ -158,17 +158,17 @@ css: src/theme.css
 
 
 {.meta} 
-[](map/#31.53160,34.47284,12.83,-0.2,39.0/+jabalia-gaza:follow,+jabalia,+cities,+villages)
+[](map/#31.50634,34.45154,12.96,0.0,39.0/+jabalia-gaza(by-car):follow,+jabalia,+gaza,+cities,+villages,+idf-poly-outlines)
 אבא של ניבאל מסיע אותה לעיר עזה, שם הם נפרדים בלי לדעת יתראו שוב.
 
 
 {.meta} 
-[](map/#31.49576,34.43543,12.83,0.0,39.0/+jabalia-gaza,+gaza-nuseirat:follow,+jabalia,+cities,+villages)
-ניבאל יוצאת למסע מפרך ברגל כשריתא ~בחיקה~ `בת ה-5 חודשים בידייה`. 
+[](map/#31.47949,34.42091,12.96,0.0,39.0/+jabalia-gaza(by-car),+gaza-nuseirat(by-foot):follow,+jabalia,+gaza,+nuseirat,+cities,+villages,+idf-poly-outlines)
+ניבאל יוצאת למסע מפרך ברגל ~כשריתא בחיקה~ `אוחזת בידיה את ריתא בת ה-5 חודשים`. 
 
 
 {.meta} 
-[](map/#31.45170,34.38256,12.83,0.0,39.0/+jabalia-gaza,+gaza-nuseirat,+nuseirat-rafah,+jabalia,+cities,+villages,+rafah)
+[](map/#31.41663,34.36232,12,0.0,39.0/+jabalia-gaza(by-car),+gaza-nuseirat(by-foot),+nuseirat-rafah(2-by-foot):follow,,+jabalia,+gaza,+nuseirat,+rafah,+cities,+villages,+idf-poly-outlines)
 באיזור א-נוסייראת הן מתאחדות עם אחמד, אותו לא ראו מזה כחצי שנה.
 
 משם, שלושתם ממשיכים אל האוהל של אחמד ברפיח.
