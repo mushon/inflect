@@ -113,16 +113,16 @@ css: src/theme.css
 ניבאל מחליטה לקחת את ריתא ולעבור לבית הוריה הסמוך.
 
 
-{.meta} 
+{.meta thumb} 
 [](embed/#vimeo.com%2F1130640202%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 ב-13 באוקטובר 2023 מוציא הצבא הישראלי את צווי הפינוי ההמוניים הראשונים לתושבי עזה. אלו מורים לכמיליון תושבי צפון הרצועה לעזוב את בתיהם ולעקור לדרום הרצועה תוך 24 שעות. 
 
-`האם יש לנו את מיפוי צווי הפינוי? האם היינו רוצים להראות אותם על המפה? אולי יותר מתאים מאשר הוידאו הזה?
-שירי: המיפוי, כיאה לצבא, מאד עמום. זה אפילו לפני ההגדרה של ״המסדרונות הבטוחים״, רק קורא לכל מי שמצפון לוואדי עזה להתפנות דרומה: 
-https://www.idf.il/en/mini-sites/idf-press-releases-israel-at-war/october-23-pr/idf-continues-efforts-to-move-gaza-s-residents-south-of-wadi-gaza-for-their-protection/
-
-יש את הסרטון הזה מרויטרס של עלוני צווי הפינוי מונחתים + יד שמחזיקה את העלון:
-https://www.reutersconnect.com/detail?id=tag%3Areuters.com%2C2023%3Anewsml_VA966813102023RP1%3A1&share=true`
+<a href="https://btselem.org/" target="blank">
+    קישור לפרק בדו״ח:
+    <strong>
+    צווי הפינוי ו״המסדרונות הבטוחים״
+    </strong>
+</a>
 
 
 {.meta} 
