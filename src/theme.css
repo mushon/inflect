@@ -100,6 +100,20 @@ section.meta p {
     font-size: 1em;
 }
 
+section.meta.thumb > a{
+    display: block;
+    background: #000 url(assets/report_thumb.png) no-repeat right bottom;
+    border-right: #FA5F5F 8px solid;
+    padding: 24px 220px 0 0;
+    color:#FA5F5F;
+    height: 116px;
+}
+
+section.meta.thumb > a strong{
+    display: block;
+    color: #fff;
+}
+
 section.testimony {
     font-family: "Heb_hand";
     max-width: 40vw;
