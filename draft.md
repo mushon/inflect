@@ -263,7 +263,7 @@ css: src/theme.css
 
 
 {.meta}
-[](map/#31.50634,34.45154,12.96,0.0,39.0/+al-zawaida-al-mawasi(2-by-foot):follow,+al-zawaida,+al-mawasi,+cities,+villages,+idf-poly-outlines)
+[](map/#31.38437,34.30257,11.63,0.0,39.0/+al-zawaida-al-mawasi(2-by-foot):follow,+al-zawaida,+al-mawasi,+cities,+villages,+idf-poly-outlines)
 
 לאחר שחרור מאשפוז בן 40 יום, ניבאל, אחמד וריתא עוברים דרומה בתקווה למצוא מחסה בטוח. הם מגיעים ל״איזור ההומניטרי״ שהגדיר הצבא הישראלי באל-מוואסי, שם הם מקימים אוהל. 
 
@@ -328,7 +328,7 @@ css: src/theme.css
 
 
 {.meta}
-[](map/#31.50634,34.45154,12.96,0.0,39.0/+al-mawasi-jabalia(by-car):follow,+al-mawasi,+jabalia,+cities,+villages,+idf-poly-outlines)
+[](map/#31.43623,34.35063,10.79,0.0,39.0/+al-mawasi-jabalia(by-car):follow,+al-mawasi,+jabalia,+cities,+villages,+idf-poly-outlines)
 
 ניבאל מחליטה לחזור עם ריתא לבית הוריה בג׳אבליא, בעוד אחמד מחליט להישאר באל-מוואסי. 
 
@@ -436,7 +436,7 @@ css: src/theme.css
 
 
 {.meta}
-[](map/#31.50634,34.45154,12.96,0.0,39.0/+jabalia-deir-al-balah(by-car):follow,+jabalia,+deir-al-balah,+cities,+villages,+idf-poly-outlines)
+[](map/#31.43623,34.35063,10.79,0.0,39.0/+jabalia-deir-al-balah(by-car):follow,+jabalia,+deir-al-balah,+cities,+villages,+idf-poly-outlines)
 
 בסוף אוגוסט 2025 יוצאת ישראל במתקפה על העיר עזה. צווי הפינוי שמוציא הצבא דורשים מכ-1.2 מיליון בני אדם לעקור - בתוכם גם ממשפחתה של ניבאל, שמחליטה לעבור דרומה, אל מתחם אוהלים בדיר אל-בלח.  
 
