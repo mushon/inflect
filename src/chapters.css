@@ -121,6 +121,7 @@
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
+    z-index: 100;
   }
 
   /* Make each section button fill available height maximally */
