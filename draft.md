@@ -338,21 +338,7 @@ css: src/theme.css
 {.testimony typewriter}
 [](embed/#vimeo.com%2F1131602000%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 
-גם הקשר שלי עם אחמד נפגע מאוד. בהתחלה הוא תמך בי והיה אומר לי ״אני אהיה הידיים והרגליים שלך, העיקר שאת וריתא תהיו בטוב״, אבל עם הזמן הרגשתי שהוא נאלץ לטפל בי מתוך רחמים.
-
-
-{.meta}
-[](tbd/#pinpoints_of_dozens_of_bombings_in_al_mawasi_nov_24_to_jan_25_—_in_the_excel_tab)
-בין נובמבר 2024 לינואר 2025, התקופה במהלכה שהתה ניבאל באל-מוואסי, תועדו לפחות 10 תקיפות קטלניות של הצבא הישראלי ב״איזור ההומניטרי״. 
-
-
-{.meta thumb} 
-<a href="https://btselem.org/" target="blank" class="dontinflect">
-    קישור לפרק בדו״ח:
-    <strong>
-    הפצצות במתחמי העקורים
-    </strong>
-</a>
+אבל אחמד היה שם בשבילי. הוא אמר לי, ״אני אהיה הידיים שלך, העיקר שאת וריתא תהיו בטוב״.
 
 
 {.testimony typewriter}
@@ -544,3 +530,21 @@ css: src/theme.css
 {.subheader}
 [](about:blank)
 ## קרדיטים
+
+
+[](tbd/#מכאן%2C_לחשוב_אם_לשבץ_מחדש%3A%0A)
+
+
+{.meta}
+[](tbd/#pinpoints_of_dozens_of_bombings_in_al_mawasi_nov_24_to_jan_25_—_in_the_excel_tab)
+בין נובמבר 2024 לינואר 2025, התקופה במהלכה שהתה ניבאל באל-מוואסי, תועדו לפחות 10 תקיפות קטלניות של הצבא הישראלי ב״איזור ההומניטרי״.
+
+
+{.meta thumb}
+<a href="https://btselem.org/" target="blank" class="dontinflect">
+    קישור לפרק בדו״ח:
+    <strong>
+    הפצצות במתחמי העקורים
+    </strong>
+</a>
+
