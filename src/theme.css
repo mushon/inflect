@@ -110,6 +110,7 @@ section.meta.thumb > a{
     height: 80px;
     cursor: pointer;
     text-shadow: none;
+    text-decoration: none;
 }
 
 section.meta.thumb > a:hover{

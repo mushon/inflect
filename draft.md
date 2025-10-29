@@ -114,10 +114,10 @@ css: src/theme.css
 
 
 {.meta thumb} 
-[](embed/#vimeo.com%2F1130640202%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[.](embed/#vimeo.com%2F1130640202%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 ב-13 באוקטובר 2023 מוציא הצבא הישראלי את צווי הפינוי ההמוניים הראשונים לתושבי עזה. אלו מורים לכמיליון תושבי צפון הרצועה לעזוב את בתיהם ולעקור לדרום הרצועה תוך 24 שעות. 
 
-<a href="https://btselem.org/" target="blank">
+<a href="https://btselem.org/" target="blank" class="dontinflect">
     קישור לפרק בדו״ח:
     <strong>
     צווי הפינוי ו״המסדרונות הבטוחים״
