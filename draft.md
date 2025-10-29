@@ -202,7 +202,7 @@ css: src/theme.css
 
 
 {.meta thumb} 
-<a href="https://btselem.org/" target="blank">
+<a href="https://btselem.org/" target="blank" class="dontinflect">
     קישור לפרק בדו״ח:
     <strong>
     תנאי החיים במתחמי העקורים
@@ -222,7 +222,7 @@ css: src/theme.css
 
 
 {.meta thumb} 
-<a href="https://btselem.org/" target="blank">
+<a href="https://btselem.org/" target="blank" class="dontinflect">
     קישור לפרק בדו״ח:
     <strong>
     מאי 2024: הפלישה לרפיח
@@ -305,7 +305,7 @@ css: src/theme.css
 
 
 {.meta thumb} 
-<a href="https://btselem.org/" target="blank">
+<a href="https://btselem.org/" target="blank" class="dontinflect">
     קישור לפרק בדו״ח:
     <strong>
     גלי העקירה ו״האיזורים ההומניטריים״
@@ -350,7 +350,7 @@ css: src/theme.css
 
 
 {.meta thumb} 
-<a href="https://btselem.org/" target="blank">
+<a href="https://btselem.org/" target="blank" class="dontinflect">
     קישור לפרק בדו״ח:
     <strong>
     הפצצות במתחמי העקורים
@@ -499,7 +499,7 @@ css: src/theme.css
 
 
 {.meta thumb} 
-<a href="https://btselem.org/" target="blank">
+<a href="https://btselem.org/" target="blank" class="dontinflect">
     קישור לפרק בדו״ח:
     <strong>
     אוגוסט-ספטמבר 2025: הרס העיר עזה
