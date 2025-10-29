@@ -2,14 +2,16 @@
 #chapter-nav {
   position: fixed;
   left: 24px;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   gap: 0;
   z-index: 1200;
   pointer-events: auto;
   align-items: flex-end;
+  justify-content: space-evenly;
+  height: 96vh;
+  top: 2vh;
+  bottom: 2vh;
 }
 
 .chapter-item {
@@ -75,7 +77,7 @@
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: .8em;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -106,32 +108,53 @@
 @media (max-width: 800px) {
   #chapter-nav {
     top: 0;
-    left: 8px;
+    left: 16px; /* More space from edge */
     height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile browsers */
     transform: none;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 4vh 0; /* Proportional padding */
+    gap: 1px; /* Default 1px gap between all items */
     /* Prevent the page from scrolling while swiping the rail */
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
   }
 
-  /* Make each item share the height so targets are easy to hit while swiping */
+  /* Make each section button fill available height maximally */
   #chapter-nav .chapter-item {
-    flex: 1 1 auto;
-    width: 28px;
-    margin: 4;
+    flex: 1 1 0;
+    min-height: 0; /* Allow items to shrink below content size */
+    width: 48px; /* Larger hit area */
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Slightly larger dots on mobile for better targets */
+  /* Larger dots on mobile for better visibility */
   #chapter-nav .chapter-dot {
-    /* width: 14px;
-    height: 2px;
-  } */
+    width: 18px;
+    height: 6px;
+    border-width: 2px;
+  }
+
+  /* Larger labels on mobile */
+  #chapter-nav .chapter-label {
+    font-size: 16px; /* Increased from 13px */
+    padding: 8px 14px; /* More generous padding */
+    left: calc(100% + 16px); /* More space from nav */
+    border-radius: 6px;
+  }
+
+  #chapter-nav .chapter-label::before {
+    left: -8px; /* Adjust arrow position */
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid rgba(0,0,0,0.78);
+  }
 
   /* When finger hovers an item (via JS), show its label */
   #chapter-nav .chapter-item.touch-hover .chapter-label {
@@ -140,27 +163,36 @@
   }
 
   #chapter-nav .chapter-item.touch-hover .chapter-dot {
-    transform: scale(1.12);
-    width: 26px;
+    transform: scale(1.15);
+    width: 32px; /* Wider when active */
   }
 
   /* A transparent overlay that captures touch events across the full rail */
   #chapter-nav .nav-touch-rail {
     position: absolute;
-    left: -6px; /* extend a little to make it easier to grab */
+    left: -12px; /* Extended hit area */
     top: 0;
-    width: 44px;
+    width: 72px; /* Wider touch target */
     height: 100%;
     pointer-events: auto;
     background: transparent;
+    z-index: 1; /* Ensure it's above dots */
   }
 
+  /* Chapter headings: same flex-grow as sections, but with 8px gap before */
   #chapter-nav .chapter-item.chapter-heading-item {
-    margin: 8px 0 2px;
-    height: auto;
+    flex: 1 1 0;
+    margin: 0;
+    margin-top: 7px; /* 8px total gap = 7px + 1px from gap property */
   }
 
   #chapter-nav .chapter-item.chapter-heading-item:first-child {
-    margin-top: 0;
+    margin-top: 0; /* No extra gap before first chapter */
+  }
+  
+  /* Larger dots for chapter headings too */
+  #chapter-nav .chapter-heading-item .chapter-dot {
+    width: 20px;
+    height: 6px;
   }
 }

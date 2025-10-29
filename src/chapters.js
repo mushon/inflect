@@ -169,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const items = Array.from(nav.querySelectorAll('.chapter-item'));
         let centers = [];
         let lastHoverIndex = -1;
+        let isDragging = false;
 
         function recomputeCenters() {
           const nrect = nav.getBoundingClientRect();
@@ -211,40 +212,78 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const onStart = (ev) => {
-          try { ev.preventDefault(); } catch (e) {}
+          try { 
+            ev.preventDefault(); 
+            ev.stopPropagation();
+          } catch (e) {}
+          isDragging = true;
           recomputeCenters();
           const t = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
           hoverNearest(t.clientY);
         };
+
         const onMove = (ev) => {
-          try { ev.preventDefault(); } catch (e) {}
+          if (!isDragging) return;
+          try { 
+            ev.preventDefault(); 
+            ev.stopPropagation();
+          } catch (e) {}
           const t = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
           hoverNearest(t.clientY);
         };
+
         const onEnd = (ev) => {
-          try { ev.preventDefault(); } catch (e) {}
+          if (!isDragging) return;
+          isDragging = false;
+          try { 
+            ev.preventDefault(); 
+            ev.stopPropagation();
+          } catch (e) {}
           activateHovered();
           // Keep the highlight briefly so the user sees what was chosen
-          setTimeout(clearHover, 220);
+          setTimeout(clearHover, 300);
         };
 
-        rail.addEventListener('touchstart', onStart, { passive: false });
-        rail.addEventListener('touchmove', onMove, { passive: false });
-        rail.addEventListener('touchend', onEnd, { passive: false });
-        rail.addEventListener('touchcancel', onEnd, { passive: false });
+        const onCancel = () => {
+          isDragging = false;
+          clearHover();
+        };
+
+        // Attach to both rail and nav for maximum reliability
+        [rail, nav].forEach(el => {
+          el.addEventListener('touchstart', onStart, { passive: false });
+          el.addEventListener('touchmove', onMove, { passive: false });
+          el.addEventListener('touchend', onEnd, { passive: false });
+          el.addEventListener('touchcancel', onCancel, { passive: false });
+        });
 
         // Also support mouse drag for small-screen simulators
-        rail.addEventListener('mousedown', onStart);
-        window.addEventListener('mousemove', (ev) => {
-          if (ev.buttons !== 1) return; // only while pressed
-          onMove(ev);
+        let mouseDown = false;
+        rail.addEventListener('mousedown', (ev) => {
+          mouseDown = true;
+          onStart(ev);
         });
-        window.addEventListener('mouseup', onEnd);
+        window.addEventListener('mousemove', (ev) => {
+          if (!mouseDown) return;
+          onMove(ev);
+        }, { passive: false });
+        window.addEventListener('mouseup', (ev) => {
+          if (!mouseDown) return;
+          mouseDown = false;
+          onEnd(ev);
+        });
 
         // Recompute centers on resize/rotation
-        window.addEventListener('resize', () => { centers = []; });
+        window.addEventListener('resize', () => { 
+          centers = [];
+          // Small delay to let layout settle
+          setTimeout(recomputeCenters, 100);
+        });
+        
+        // Initial computation
+        setTimeout(recomputeCenters, 100);
       }
-    } catch (e) { /* non-fatal */ }
+    } catch (e) { console.warn('[chapters] Mobile rail setup failed:', e); }
 
     // Helper function to update hash with section number
     function updateHashWithSection(targetId) {
