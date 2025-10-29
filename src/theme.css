@@ -312,9 +312,10 @@ iframe {
     body>div::after {
         content: '';
         position: absolute;
-        top: 60vh;
+        top: 70vh;
         width: 100%;
-        height: 10vh;
+        height: 15vh;
+        margin-top: -15vh;
         pointer-events: none;
         background: linear-gradient(180deg, rgba(51, 51, 51, 0.00) 0%, #333 100%);
         display: block;
@@ -349,11 +350,15 @@ iframe {
 
     section.testimony{
         max-width: none;
-        background: linear-gradient(0deg, rgba(51, 51, 51, 0.60) 35%, rgba(51, 51, 51, 0.00) 45%);
+        background: none;
     }
 
     section.subheader{
         justify-content: center;
         height: 100vh;
+    }
+
+    section.meta.thumb > a{
+        font-size: 0.8em;
     }
 }
