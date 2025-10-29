@@ -309,6 +309,17 @@ iframe {
         pointer-events: none; /* don't intercept taps when covered */
     }
 
+    body>div::after {
+        content: '';
+        position: absolute;
+        bottom: 30vh;
+        width: 100%;
+        height: 10vh;
+        pointer-events: none;
+        background: linear-gradient(180deg, rgba(51, 51, 51, 0.00) 0%, #333 100%);
+        display: block;
+    }
+
     main {
         position: fixed; 
         top: 0;
