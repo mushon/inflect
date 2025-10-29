@@ -48,7 +48,7 @@ section img {
     max-width: 100%;
 }
 
-strong { font-weight: 500; }
+strong { font-weight: 700; }
 
 h1, h2, h3 { font-family: Levit_1950, sans-serif; font-feature-settings: 'calt' off;}
 h1 { font-size: 2.4em; font-weight: 200; margin-bottom: 0;}
@@ -105,9 +105,16 @@ section.meta.thumb > a{
     display: block;
     background: #000 url(assets/report_thumb.png) no-repeat right bottom;
     border-right: #FA5F5F 8px solid;
-    padding: 24px 220px 0 0;
+    padding: 56px 220px 0 0;
     color:#FA5F5F;
-    height: 116px;
+    height: 80px;
+    cursor: pointer;
+    text-shadow: none;
+}
+
+section.meta.thumb > a:hover{
+    background: #FA5F5F url(assets/report_thumb_hover.png) no-repeat right bottom;
+    color: #000;
 }
 
 section.meta.thumb > a strong{
