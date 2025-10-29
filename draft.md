@@ -196,10 +196,12 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](img/#rita_tent2.jpg)
+[](embed/#vimeo.com%2F1131608820%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 
 למרות האיחוד עם אחמד, היה לי קשה להסתגל לחיים באוהל ברפיח. זה היה עינוי מתמשך, ככל הנראה מהימים הקשים בחיי.
 
+
+{.meta thumb} 
 <a href="https://btselem.org/" target="blank">
     קישור לפרק בדו״ח:
     <strong>
@@ -209,7 +211,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130687838%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](img/#rita_tent2.jpg)
 
 לא סיפרתי על זה למשפחה שלי, כי הם התנגדו מלכתחילה שאעקור דרומה. התביישתי לספר להם כמה קשה לי.
 
@@ -218,6 +220,8 @@ css: src/theme.css
 [](embed/#vimeo.com%2F1130635381%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 ב-6 במאי 2024, מפיץ הצבא הישראלי צווי פינוי חדשים הדורשים מתושבי רפיח להתפנות. כבר ביממה לאחר מכן מגבירה ישראל את תקיפותיה בעיר, תוך תחילת פלישה של כוחות קרקעיים. 
 
+
+{.meta thumb} 
 <a href="https://btselem.org/" target="blank">
     קישור לפרק בדו״ח:
     <strong>
@@ -241,7 +245,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130692333%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130687838%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 
 הבוקר של ה-7 באוקטובר 2024 היה מרגש מאוד, כי ריתא קראה לי "אמא" בפעם הראשונה בזמן שישבה בחיקי.
 
@@ -299,6 +303,8 @@ css: src/theme.css
 
 עד לספטמבר 2024, האיזור המדברי, שאינו מחובר לתשתיות חשמל, מים וביוב ברובו, התמלא עד אפס מקום באוהלים, בהם נאלצו לחיות מעל למיליון בני אדם שנעקרו מכל רחבי הרצועה.
 
+
+{.meta thumb} 
 <a href="https://btselem.org/" target="blank">
     קישור לפרק בדו״ח:
     <strong>
@@ -342,6 +348,8 @@ css: src/theme.css
 [](tbd/#pinpoints_of_dozens_of_bombings_in_al_mawasi_nov_24_to_jan_25_—_in_the_excel_tab)
 בין נובמבר 2024 לינואר 2025, התקופה במהלכה שהתה ניבאל באל-מוואסי, תועדו לפחות 10 תקיפות קטלניות של הצבא הישראלי ב״איזור ההומניטרי״. 
 
+
+{.meta thumb} 
 <a href="https://btselem.org/" target="blank">
     קישור לפרק בדו״ח:
     <strong>
@@ -351,7 +359,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](img/#rita_tent1.jpg)
+[](embed/#vimeo.com%2F1131630900%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 
 חלמתי שנחזור לצפון הרצועה, לחיק המשפחה שלי, לימים שבהם כולנו היינו ביחד. כל-כך התגעגעתי אליהם. 
 
@@ -429,6 +437,8 @@ css: src/theme.css
 
 
 {.testimony typewriter}
+[](img/#rita_tent1.jpg)
+
 הרגשתי שהוא מתקשה מאוד לדאוג לי ולריתא. הקושי להשיג מים ואוכל עשה אותו עצבני, ולרגעים אפילו חששתי ממנו.
 
 
@@ -487,6 +497,8 @@ css: src/theme.css
 
 בסוף אוגוסט 2025 יוצאת ישראל במתקפה על העיר עזה. צווי הפינוי שמוציא הצבא דורשים מכ-1.2 מיליון בני אדם לעקור - בתוכם גם ממשפחתה של ניבאל, שמחליטה לעבור דרומה, אל מתחם אוהלים בדיר אל-בלח.  
 
+
+{.meta thumb} 
 <a href="https://btselem.org/" target="blank">
     קישור לפרק בדו״ח:
     <strong>
@@ -511,7 +523,7 @@ css: src/theme.css
 
 
 {.meta}
-[](embed/vimeo.com%2F1130636986%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130636986%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
 `טקסט סיום: 
 ב-10 לאוקטובר 2025 נכנסת לתוקף הפסקת האש בין ישראל לחמאס. 
 
@@ -526,9 +538,6 @@ css: src/theme.css
 
 בחודשים האחרונים, סיפורה של ניבאל זכה לפרסום בעיתונות וברשתות החברתיות. היא מקווה שבעזרת הפרסום תצליח לגייס כסף כדי לצאת מהרצועה ולעבור השתלה של גפיים תותבות.`
 
-
-[](embed/#vimeo.com%2F1130635381%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
-`לחשוב איפה לשבץ סרטון`
 
 {.subheader}
 [](about:blank)
