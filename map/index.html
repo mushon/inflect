@@ -98,7 +98,10 @@ function parseHash() {
       // Support +id:follow, ~id:follow and +id(source):follow
       // token examples: +name, ~name, +name:follow, +name(source), +name(source):follow
       const match = token.match(/^([+~])([^:(]+)(?:\(([^)]+)\))?(?::follow)?$/);
-      if (!match) return;
+      if (!match) {
+        console.warn('[HASH] Failed to parse layer token:', token);
+        return;
+      }
       const [, sign, lname, sourceHint] = match;
       // Always use the id without :follow for loading/toggling
       layerState[lname] = { sign, sourceHint: sourceHint || null, follow: token.endsWith(':follow') };
@@ -626,8 +629,41 @@ map.on('load', () => {
       styleDefaultVisibility[layer.id] = vis;
     }
   });
-  // Only update the toggle list to reflect the current style visibility (do not use hash for initial state)
+  // Apply layer visibility from hash on initial load
+  const { layers: hashLayers } = parseHash();
+  const hashStr = window.location.hash.replace('#', '');
+  const [, layersStr] = hashStr.split('/');
+  if (layersStr) {
+    const explicitState = {};
+    layersStr.split(',').forEach(token => {
+      const match = token.match(/^([+~])([^:(]+)(?:\(([^)]+)\))?(?::follow)?$/);
+      if (!match) return;
+      const [, sign, lname] = match;
+      explicitState[lname] = sign;
+    });
+    
+    // Apply visibility to all layers based on hash
+    allStyleLayers.forEach(layer => {
+      const id = layer.id;
+      const explicit = explicitState[id];
+      if (explicit === '+') {
+        // Explicitly shown in hash
+        if (map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'visible') {
+          map.setLayoutProperty(id, 'visibility', 'visible');
+        }
+      } else if (explicit === '~') {
+        // Explicitly hidden in hash
+        if (map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') {
+          map.setLayoutProperty(id, 'visibility', 'none');
+        }
+      }
+      // If not mentioned in hash, leave as-is (default from style)
+    });
+  }
+  
+  // Update the toggle list to reflect current visibility
   createLayerControls(map, allStyleLayers.filter(l => map.getLayer(l.id) && map.getLayoutProperty(l.id, 'visibility') === 'visible').map(l => l.id));
+  
   // Re-apply camera from hash after style load to ensure bearing/pitch/zoom are honored
   try {
     const { camera: parsedCamera } = parseHash();

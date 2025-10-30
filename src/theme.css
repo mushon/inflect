@@ -94,6 +94,7 @@ section:first-child p{
 section.subheader {
     text-align: center;
     max-width: 100%;
+    justify-content: center;
 }
 
 section.meta p {
@@ -101,7 +102,7 @@ section.meta p {
     font-size: 1em;
 }
 
-section.meta.thumb > a{
+section.thumb > a{
     display: block;
     background: #000 url(assets/report_thumb.png) no-repeat right bottom;
     border-right: #FA5F5F 8px solid;
@@ -111,14 +112,15 @@ section.meta.thumb > a{
     cursor: pointer;
     text-shadow: none;
     text-decoration: none;
+    font-family: David Libre, serif;
 }
 
-section.meta.thumb > a:hover{
+section.thumb > a:hover{
     background: #FA5F5F url(assets/report_thumb_hover.png) no-repeat right bottom;
     color: #000;
 }
 
-section.meta.thumb > a strong{
+section.thumb > a strong{
     display: block;
     color: #fff;
 }
@@ -256,7 +258,7 @@ section {
     max-width: 60vh;
     color: #fff;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     flex-direction: column;
 }
 
@@ -358,7 +360,7 @@ iframe {
         height: 100vh;
     }
 
-    section.meta.thumb > a{
+    section.thumb > a{
         font-size: 0.8em;
     }
 }
