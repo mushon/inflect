@@ -359,8 +359,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper function to update hash with section number
     function updateHashWithSection(targetId) {
-      // Extract section number from IDs like 'section-36'
-      const match = targetId.match(/section-(\d+)$/);
+      // Extract section number from IDs like 'main-child-36' or 'section-36'
+      const match = targetId.match(/(?:main-child|section)-(\d+)$/);
       if (!match) return;
       
       const sectionNum = match[1];
@@ -648,8 +648,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!match) return;
     
     const sectionNum = parseInt(match[1], 10);
-    const targetId = 'section-' + sectionNum;
-    const target = document.getElementById(targetId);
+    // Try both new and legacy ID formats
+    let targetId = 'main-child-' + sectionNum;
+    let target = document.getElementById(targetId);
+    
+    // Fallback to legacy section ID format
+    if (!target) {
+      targetId = 'section-' + sectionNum;
+      target = document.getElementById(targetId);
+    }
     
     if (!target) {
       console.warn('[chapters] Section not found:', targetId);
