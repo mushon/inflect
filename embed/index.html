@@ -3,47 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Embed loader (floating)</title>
+  <title>Embed loader</title>
   <!-- Plyr CSS -->
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
     :root{--ui-bg:rgba(0,0,0,0.6);--ui-fg:#fff}
     html,body{height:100%;margin:0;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    /* Fullscreen output area */
     #canvas{position:fixed;inset:0;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    #injected{position:relative;display:flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;}
-    /* floating draggable centered input */
+    #injected{width:100%;height:100%;}
+    #injected.cover{position:fixed;top:0;left:50%;transform:translateX(-50%);width:177vh;height:100vh;overflow:hidden;}
+    
+    /* Floating UI */
     #floating{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:320px}
-    #ui-handle{background:var(--ui-bg);padding:8px;border-radius:10px;color:var(--ui-fg);cursor:grab;display:flex;align-items:center;gap:8px}
-  /* avoid touch/scroll gesture interference on the drag handle */
-  #ui-handle{touch-action:none}
-    #ui-body{background:rgba(0,0,0,0.45);padding:10px;border-radius:10px;color:var(--ui-fg);display:flex;gap:8px;align-items:center}
-    input[type=text]{flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--ui-fg)}
-    button{padding:8px 10px;border-radius:6px;border:0;background:#2ea44f;color:#061;font-weight:700;cursor:pointer}
+    #ui-handle{background:var(--ui-bg);padding:8px;border-radius:10px;color:var(--ui-fg);cursor:grab;display:flex;align-items:center;gap:8px;touch-action:none}
+    #ui-body{background:rgba(0,0,0,0.45);padding:10px;border-radius:10px;color:var(--ui-fg);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    input[type=text]{flex:1;min-width:200px;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--ui-fg)}
+    button{padding:8px 10px;border-radius:6px;border:0;background:#2ea44f;color:#fff;font-weight:700;cursor:pointer}
     button.secondary{background:#444;color:#fff}
-  /* size controls */
-  .size-controls{display:none;gap:6px;align-items:center}
-  .size-controls input[type=number]{width:84px;padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--ui-fg)}
-  .size-controls label{font-size:0.8rem;color:rgba(255,255,255,0.8)}
-    /* when embedded as full page, let injected cover viewport */
-    .cover { width:100vw; height:100vh; }
-    iframe, video { display:block; border:0; }
-  /* responsive iframe wrapper to let content drive sizing when possible */
-  .embed-wrapper{display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative;overflow:hidden}
-  /* Plyr container styling */
-  .plyr-container{width:100%;height:auto !important;position:relative;}
-  /* Hide Plyr UI completely */
-  .plyr__controls{display:none !important;}
-  .plyr__control--overlaid{display:none !important;}
-  .plyr--video .plyr__control.plyr__tab-focus,
-  .plyr--video .plyr__control:hover,
-  .plyr--video .plyr__control[aria-expanded=true]{background:transparent;}
-  .plyr__poster{display:none !important;}
+    
+    /* Plyr container */
+    .embed-wrapper{width:100%;height:100%;position:relative;overflow:hidden}
+    .plyr-container{width:100%;height:100%;position:relative;}
+    
+    /* Hide Plyr UI completely */
+    .plyr__controls{display:none !important;}
+    .plyr__control--overlaid{display:none !important;}
+    .plyr__poster{display:none !important;}
   </style>
-  <script src="../src/dompurify.min.js"></script>
-  <!-- Plyr JS -->
   <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-  <!-- PlayerAdapter -->
   <script src="../src/players/adapter.js"></script>
 </head>
 <body>
@@ -52,402 +39,100 @@
   </div>
 
   <div id="floating" role="dialog" aria-label="Embed loader">
-    <div id="ui-handle">Drag • Paste oEmbed URL</div>
+    <div id="ui-handle">Drag • Paste Video URL</div>
     <div id="ui-body">
       <input id="url" type="text" placeholder="https://..." aria-label="url input">
       <button id="load">Load</button>
-    <label style="display:flex;align-items:center;gap:6px"><input id="autoplay" type="checkbox"> autoplay</label>
-      <label style="display:flex;align-items:center;gap:6px"><input id="lock-aspect" type="checkbox"> lock</label>
+      <label style="display:flex;align-items:center;gap:6px"><input id="autoplay" type="checkbox"> autoplay</label>
       <label style="display:flex;align-items:center;gap:6px"><input id="loop" type="checkbox"> loop</label>
+      <label style="display:flex;align-items:center;gap:6px"><input id="cover" type="checkbox"> cover</label>
       <button id="clear" class="secondary">Clear</button>
-  <button id="cover" class="secondary" title="Toggle cover/contain">Cover</button>
-  <button id="pan-toggle" class="secondary" title="Toggle pan/zoom interactions">Pan: Off</button>
-      <!-- numeric size controls removed: direct manipulation (drag/wheel) is used instead -->
     </div>
   </div>
 
 <script>
-// Fresh minimal floating oEmbed loader
 (function(){
-  const providers = [
-    {name:'YouTube', match:/youtube\.com|youtu\.be/, endpoint:'https://www.youtube.com/oembed?format=json&url='},
-    {name:'Vimeo', match:/vimeo\.com/, endpoint:'https://vimeo.com/api/oembed.json?url='},
-    {name:'TikTok', match:/tiktok\.com/, endpoint:'https://www.tiktok.com/oembed?url='},
-    {name:'Twitter', match:/twitter\.com|x\.com/, endpoint:'https://publish.twitter.com/oembed?url='},
-    // Facebook often needs tokens or proxy; include but may fail
-    {name:'Facebook', match:/facebook\.com|fb\.watch/, endpoint:'https://www.facebook.com/plugins/post/oembed.json/?url='}
-  ];
-
-  const canvas = document.getElementById('canvas');
   const injected = document.getElementById('injected');
   const floating = document.getElementById('floating');
   const handle = document.getElementById('ui-handle');
   const urlIn = document.getElementById('url');
   const loadBtn = document.getElementById('load');
   const clearBtn = document.getElementById('clear');
-  const coverBtn = document.getElementById('cover');
-
-  // default to contain (show full video without cropping)
-  let coverMode = false; // default: contain
-  let lastData = null;
-  // size control elements
-  const sizeControls = document.getElementById('size-controls');
-  const lockAspect = document.getElementById('lock-aspect');
   const autoplayChk = document.getElementById('autoplay');
   const loopChk = document.getElementById('loop');
-  const panToggleBtn = document.getElementById('pan-toggle');
-  let currentAspect = null;
-  let panEnabled = false;
-  // Direct manipulation state
-  let activeContentEl = null;
-  let manipState = null; // {startPointer:{x,y}, startPx, startPy}
-  let currentTransform = { s: 1, x: 0, y: 0 };
-  let activeOverlay = null;
-  // embed readiness / pending state
-  let embedLoaded = false;
-  let pendingState = null;
-  // manipulation debounce state
-  let isManipulating = false;
-  let _manipWriteTimer = null;
-  let _lastQueuedState = null;
-  const MANIP_DEBOUNCE_MS = 100;
-  // Player adapter state
+  const coverChk = document.getElementById('cover');
+  
   let playerAdapter = null;
-  let playerMode = false; // true when using PlayerAdapter instead of oEmbed
-  // default: lock proportions
-  try{ lockAspect.checked = true; }catch(e){}
-
-  // initialize cover/contain button label
-  try{ coverBtn.textContent = coverMode ? 'Cover' : 'Contain'; }catch(e){}
-
-  // --- Provider-specific helpers -------------------------------------------
-  function shouldUsePlyrAdapter(url){
-    const u = String(url || '').toLowerCase();
-    return u.includes('youtube.com') || u.includes('youtu.be') || u.includes('vimeo.com') || u.match(/\.(mp4|webm|ogg)$/);
-  }
-
-  function isVimeoUrl(u){ try{ const url = new URL(u, location.href); return /vimeo\.com$/i.test(url.hostname) || /player\.vimeo\.com$/i.test(url.hostname); }catch(e){ return /vimeo\.com/.test(String(u||'')); } }
-  function patchVimeoParams(u, opts){
-    try{
-      const url = new URL(u, location.href);
-      if(!( /vimeo\.com$/i.test(url.hostname) || /player\.vimeo\.com$/i.test(url.hostname))) return u; // not vimeo
-      if(opts && opts.autoplay){ url.searchParams.set('autoplay','1'); url.searchParams.set('muted','1'); }
-      if(opts && opts.loop){ url.searchParams.set('loop','1'); }
-      // Improve inline autoplay/loop behavior
-      url.searchParams.set('autopause','0');
-      url.searchParams.set('playsinline','1');
-      // In practice, Vimeo's background mode is the most reliable way to ensure
-      // muted autoplay + looping without user gesture across browsers. Enable
-      // it when both autoplay and loop are requested. This also hides controls.
-      if(opts && opts.autoplay && opts.loop){ url.searchParams.set('background','1'); }
-      return url.toString();
-    }catch(e){
-      // best-effort string fallback
-      let out = String(u||'');
-      const sep = out.indexOf('?')===-1 ? '?' : '&';
-      const parts = [];
-      if(opts && opts.autoplay){ parts.push('autoplay=1','muted=1'); }
-      if(opts && opts.loop){ parts.push('loop=1'); }
-      parts.push('autopause=0','playsinline=1');
-      if(opts && opts.autoplay && opts.loop){ parts.push('background=1'); }
-      return out + sep + parts.join('&');
-    }
-  }
 
   // --- Hash state helpers -------------------------------------------------
   function parseHash(){
     try{
-      // We support two hash styles:
-      // 1) Legacy key=value pairs (e.g. u=...&s=...)
-      // 2) New compact slash/comma format: compactUrl[/s,x,y][/flag,flag]
-      // Query params (location.search) still override hash values when present.
       const q = new URLSearchParams(location.search.replace(/^\?/, ''));
       const rawHash = (location.hash || '').replace(/^#/, '');
       const out = {};
 
-      // Helper: parse legacy key=value hash when it looks like one
-      const looksLikeKv = rawHash.indexOf('=') !== -1 || rawHash.indexOf('&') !== -1;
-      if(looksLikeKv){
-        const p = new URLSearchParams(rawHash);
-        if(p.has('u')) out.url = expandUrlFromHash(p.get('u'));
-        else if(p.has('url')) out.url = expandUrlFromHash(p.get('url'));
-        if(p.has('m')) out.mode = p.get('m'); else if(p.has('mode')) out.mode = p.get('mode');
-        if(p.has('w')) out.w = Number(p.get('w')) || null; if(p.has('h')) out.h = Number(p.get('h')) || null;
-        if(p.has('s')) out.s = Number(p.get('s')) || null;
-        if(p.has('x')) out.x = Number(p.get('x')) || 0; if(p.has('y')) out.y = Number(p.get('y')) || 0;
-        if(p.has('x_frac')){ const v = Number(p.get('x_frac')); if(!Number.isNaN(v)) out.x = (v * 100); }
-        if(p.has('y_frac')){ const v = Number(p.get('y_frac')); if(!Number.isNaN(v)) out.y = (v * 100); }
-        if(p.has('l')) out.lock = p.get('l') === '1' || p.get('l') === 'true';
-          if(p.has('loop')) out.loop = p.get('loop') === '1' || p.get('loop') === 'true';
-        if(p.has('a')) out.autoplay = p.get('a') === '1' || p.get('a') === 'true';
-        else if(p.has('lock')) out.lock = p.get('lock') === '1' || p.get('lock') === 'true';
-      } else if(rawHash){
-        // New compact format
-        // Example: #example.com/watch?v=xxx/1.2,10,20/autoplay,cover
+      // Compact format: #url/flags
+      if(rawHash){
         const parts = rawHash.split('/').filter(Boolean);
         if(parts.length > 0){
           try{ out.url = expandUrlFromHash(parts[0]); }catch(e){}
         }
         if(parts.length > 1){
-          const segment = parts[1].split(',').map(t=>t.trim()).filter(Boolean);
-          // Check if this segment looks like coords (all numbers) or flags (has keywords/key=value)
-          const hasFlags = segment.some(s => s.includes('=') || ['autoplay','loop','cover','contain'].includes(s));
-          
-          if(!hasFlags && segment.length >= 1 && segment.every(s => !isNaN(Number(s)))){
-            // All numeric: treat as coords (x,y,s or s,x,y or just s)
-            if(segment.length >= 3){
-              const a = Number(segment[0]); const b = Number(segment[1]); const c = Number(segment[2]);
-              // Heuristic: prefer interpreting as x,y,s when first two are percentages (0..100)
-              // and third is a reasonable scale (0.01..20). Otherwise fall back to s,x,y.
-              if(!Number.isNaN(a) && !Number.isNaN(b) && !Number.isNaN(c)){
-                const looksLikeXYs = (a >= 0 && a <= 100) && (b >= 0 && b <= 100) && (c > 0 && c <= 20);
-                const looksLikeSxy = (a > 0 && a <= 20) && (b >= 0 && b <= 100) && (c >= 0 && c <= 100);
-                if(looksLikeXYs || (!looksLikeSxy && looksLikeXYs)){
-                  out.x = a; out.y = b; out.s = c;
-                } else {
-                  out.s = a; out.x = b; out.y = c;
-                }
-              }
-            } else if(segment.length === 2){
-              // two values: interpret as x,y (scale defaults to 1)
-              const a = Number(segment[0]); const b = Number(segment[1]); if(!Number.isNaN(a) && !Number.isNaN(b)){ out.x = a; out.y = b; }
-            } else if(segment.length === 1){
-              // single value: interpret as scale
-              const a = Number(segment[0]); if(!Number.isNaN(a)) out.s = a;
-            }
-          } else {
-            // Has flags: parse them
-            for(const f of segment){
-              if(f === 'autoplay') out.autoplay = true;
-              else if(f === 'cover') out.mode = 'cover';
-              else if(f === 'contain') out.mode = 'contain';
-              else if(f === 'loop') out.loop = true;
-              // Extended video flags: t=start[-end], v=0..100, r=0.5..2, m=0|1
-              else if(f.startsWith('t=')){
-                const tVal = f.substring(2);
-                if(tVal.includes('-')){
-                  const [s,e] = tVal.split('-').map(v=>Number(v.trim()));
-                  if(!Number.isNaN(s) && !Number.isNaN(e)){ out.tStart = s; out.tEnd = e; }
-                } else {
-                  const s = Number(tVal);
-                  if(!Number.isNaN(s)) out.tStart = s;
-                }
-              }
-              else if(f.startsWith('v=')){ const v = Number(f.substring(2)); if(!Number.isNaN(v)) out.volume = Math.max(0, Math.min(100, v)); }
-              else if(f.startsWith('r=')){ const r = Number(f.substring(2)); if(!Number.isNaN(r)) out.rate = Math.max(0.25, Math.min(4, r)); }
-              else if(f.startsWith('m=')){ const m = f.substring(2); out.muted = (m === '1' || m === 'true'); }
-            }
-          }
-        }
-        if(parts.length > 2){
-          // Third segment: always flags
-          const flags = parts[2].split(',').map(t=>t.trim()).filter(Boolean);
+          const flags = parts[1].split(',').map(t=>t.trim()).filter(Boolean);
           for(const f of flags){
             if(f === 'autoplay') out.autoplay = true;
-            else if(f === 'cover') out.mode = 'cover';
-            else if(f === 'contain') out.mode = 'contain';
             else if(f === 'loop') out.loop = true;
-            // Extended video flags: t=start[-end], v=0..100, r=0.5..2, m=0|1
-            else if(f.startsWith('t=')){
-              const tVal = f.substring(2);
-              if(tVal.includes('-')){
-                const [s,e] = tVal.split('-').map(v=>Number(v.trim()));
-                if(!Number.isNaN(s) && !Number.isNaN(e)){ out.tStart = s; out.tEnd = e; }
-              } else {
-                const s = Number(tVal);
-                if(!Number.isNaN(s)) out.tStart = s;
-              }
-            }
-            else if(f.startsWith('v=')){ const v = Number(f.substring(2)); if(!Number.isNaN(v)) out.volume = Math.max(0, Math.min(100, v)); }
-            else if(f.startsWith('r=')){ const r = Number(f.substring(2)); if(!Number.isNaN(r)) out.rate = Math.max(0.25, Math.min(4, r)); }
-            else if(f.startsWith('m=')){ const m = f.substring(2); out.muted = (m === '1' || m === 'true'); }
-            // nolock and pan are intentionally ignored for compact flags (do not echo them)
+            else if(f === 'cover') out.cover = true;
           }
         }
       }
 
-      // Query params override whichever hash style was used
+      // Query params override hash
       for(const [k,v] of q.entries()){
         if(k === 'u' || k === 'url') out.url = expandUrlFromHash(v);
-        else if(k === 'm' || k === 'mode') out.mode = v;
-        else if(k === 'w') out.w = Number(v) || null;
-        else if(k === 'h') out.h = Number(v) || null;
-        else if(k === 's') out.s = Number(v) || null;
-        else if(k === 'x') out.x = Number(v) || 0;
-        else if(k === 'y') out.y = Number(v) || 0;
-        else if(k === 'x_frac'){ const n=Number(v); if(!Number.isNaN(n)) out.x = n*100; }
-        else if(k === 'y_frac'){ const n=Number(v); if(!Number.isNaN(n)) out.y = n*100; }
-        else if(k === 'l' || k === 'lock') out.lock = (v === '1' || v === 'true');
-        else if(k === 'a' || k === 'autoplay') out.autoplay = (v === '1' || v === 'true');
-        else if(k === 'loop') out.loop = (v === '1' || v === 'true');
+        else if(k === 'a' || k === 'autoplay') out.autoplay = (v === '1' || v === 'true' || v === '');
+        else if(k === 'loop') out.loop = (v === '1' || v === 'true' || v === '');
+        else if(k === 'cover') out.cover = (v === '1' || v === 'true' || v === '');
       }
 
-      // normalize x/y into percentages (0..100). Accept formats:
-      // fractional 0..1 -> convert to percent; pixel values (>100) -> convert using viewport size
-      try{
-        const vw = window.innerWidth || 1, vh = window.innerHeight || 1;
-        if(typeof out.x !== 'undefined' && out.x !== null){ const vx = Number(out.x); if(Math.abs(vx) <= 1) out.x = vx * 100; else if(vx > 100) out.x = (vx / vw) * 100; else out.x = vx; }
-        if(typeof out.y !== 'undefined' && out.y !== null){ const vy = Number(out.y); if(Math.abs(vy) <= 1) out.y = vy * 100; else if(vy > 100) out.y = (vy / vh) * 100; else out.y = vy; }
-      }catch(e){}
-
-      if(typeof out.lock !== 'undefined') out.lock = !!out.lock;
       if(typeof out.autoplay !== 'undefined') out.autoplay = !!out.autoplay;
       if(typeof out.loop !== 'undefined') out.loop = !!out.loop;
+      if(typeof out.cover !== 'undefined') out.cover = !!out.cover;
+      
       return out;
     }catch(e){ return {}; }
   }
 
-  // normalize state numeric types (scale and x/y) and clamp percentages
-  function normalizeState(st){
-    if(!st || typeof st !== 'object') return {};
-    const out = Object.assign({}, st);
-    if(typeof out.s !== 'undefined' && out.s !== null) out.s = Number(out.s) || null;
-    try{
-      const vw = window.innerWidth || 1, vh = window.innerHeight || 1;
-      if(typeof out.x !== 'undefined' && out.x !== null){ let vx = Number(out.x); if(Math.abs(vx) <= 1) vx = vx * 100; else if(vx > 100) vx = (vx / vw) * 100; out.x = Math.max(0, Math.min(100, vx)); }
-      if(typeof out.y !== 'undefined' && out.y !== null){ let vy = Number(out.y); if(Math.abs(vy) <= 1) vy = vy * 100; else if(vy > 100) vy = (vy / vh) * 100; out.y = Math.max(0, Math.min(100, vy)); }
-    }catch(e){}
-    if(typeof out.lock !== 'undefined') out.lock = !!out.lock;
-    if(typeof out.autoplay !== 'undefined') out.autoplay = !!out.autoplay;
-    if(typeof out.loop !== 'undefined') out.loop = !!out.loop;
-    return out;
-  }
-
-  // Prefer initial parsed state (captured at load) and merge with current query/hash; query overrides initial
-  function getEffectiveState(){
-    const current = (function(){ try{ return parseHash(); }catch(e){ return {}; } })();
-    const initial = (window.__embed_initial_state && Object.keys(window.__embed_initial_state).length) ? window.__embed_initial_state : {};
-    const merged = Object.assign({}, initial, current);
-    return normalizeState(merged);
-  }
-
-  // Queue or apply a parsed state only when the embed is ready. If the embed
-  // hasn't signalled readiness yet, keep the normalized state in `pendingState`.
-  function applyOrQueueState(st){
-    try{
-      const norm = normalizeState(st || {});
-      pendingState = norm;
-      if(embedLoaded && injected && injected.firstElementChild){
-        // apply now
-        try{ applyTransform(Number(norm.s || 1), Number(norm.x || 0), Number(norm.y || 0)); }catch(e){}
-      try{ currentTransform.s = Number(norm.s || 1); currentTransform.x = Number(norm.x || 0); currentTransform.y = Number(norm.y || 0); }catch(e){}
-        pendingState = null;
-      }
-    }catch(e){ /* ignore */ }
-  }
-
-  function onEmbedReady(){
-    try{
-      try{ console.debug('[embed] onEmbedReady', {t:performance.now(), currentTransform, pendingState}); }catch(e){}
-      embedLoaded = true;
-      // clear any preview transform applied to the injected container and
-      // apply the authoritative transform to the embedded content.
-      try{ injected.style.transform = ''; injected.style.transformOrigin = ''; }catch(e){}
-      try{ if(currentTransform && injected && injected.firstElementChild){ requestAnimationFrame(()=>{ try{ applyTransform(Number(currentTransform.s||1), Number(currentTransform.x||0), Number(currentTransform.y||0)); }catch(e){} }); } }catch(e){}
-      if(pendingState){ requestAnimationFrame(()=>{ try{ applyOrQueueState(pendingState); }catch(e){} }); }
-    }catch(e){}
-  }
-
-  // Immediately echo state visually. If embedded content exists, applyTransform
-  // directly. Otherwise, apply a conservative preview transform to the injected
-  // container so the UI reflects the requested position/scale immediately.
-  function echoStateImmediately(st){
-    try{
-      try{ console.debug('[embed] echoStateImmediately called', {t:performance.now(), st}); }catch(e){}
-      const norm = normalizeState(st || {});
-      currentTransform.s = Number(norm.s || 1);
-      currentTransform.x = Number(norm.x || 0);
-      currentTransform.y = Number(norm.y || 0);
-      // if content present, apply directly
-      if(injected && injected.firstElementChild){ try{ applyTransform(currentTransform.s, currentTransform.x, currentTransform.y); }catch(e){} }
-      else {
-        // preview on injected container: compute px/py from percentages
-        try{
-          const px = Math.round((Number(currentTransform.x||0) / 100) * window.innerWidth || 0);
-          const py = Math.round((Number(currentTransform.y||0) / 100) * window.innerHeight || 0);
-          injected.style.transformOrigin = '50% 50%';
-          injected.style.transform = `translate(${px}px, ${py}px) scale(${currentTransform.s})`;
-          try{ console.debug('[embed] echo preview set', {t:performance.now(), px, py, s:currentTransform.s}); }catch(e){}
-        }catch(e){}
-      }
-    }catch(e){}
-  }
-
   function writeHash(state){
     try{
-      try{ console.debug('[embed] writeHash', {t:performance.now(), state: state}); }catch(e){}
-      // Build compact hash in format: compactUrl[/s,x,y][/flag,flag]
-      // Omit coords if they are default (s=1,x=0,y=0). Omit flags that are defaults.
       const parts = [];
       if(state.url) parts.push(compactUrlForHash(state.url));
 
-      // decide whether to emit coords in the order: x,y,s (per request)
-      const sVal = (typeof state.s !== 'undefined' && state.s !== null) ? Number(state.s) : 1;
-      const xVal = (typeof state.x !== 'undefined' && state.x !== null) ? Number(state.x) : 0;
-      const yVal = (typeof state.y !== 'undefined' && state.y !== null) ? Number(state.y) : 0;
-      const coordsAreDefault = (Math.abs(sVal - 1) < 1e-6) && (Math.abs(xVal) < 1e-6) && (Math.abs(yVal) < 1e-6);
-      if(!coordsAreDefault){
-        // keep numbers short and minimal and emit as x,y,s
-        const cx = (Math.round(xVal*100)/100).toString();
-        const cy = (Math.round(yVal*100)/100).toString();
-        const cs = (Math.round(sVal*100)/100).toString();
-        parts.push([cx,cy,cs].join(','));
-      }
-
-  // flags: include only non-defaults. Do not echo 'nolock' or 'pan' in compact hash.
-  const flags = [];
-  if(typeof state.autoplay !== 'undefined' && state.autoplay === true) flags.push('autoplay');
-  if(typeof state.loop !== 'undefined' && state.loop === true) flags.push('loop');
-  // Extended video flags
-  if(typeof state.tStart !== 'undefined' && state.tStart !== null){
-    const ts = Math.round(Number(state.tStart)*10)/10;
-    if(typeof state.tEnd !== 'undefined' && state.tEnd !== null){
-      const te = Math.round(Number(state.tEnd)*10)/10;
-      flags.push(`t=${ts}-${te}`);
-    } else {
-      flags.push(`t=${ts}`);
-    }
-  }
-  if(typeof state.volume !== 'undefined' && state.volume !== null && state.volume !== 100){
-    flags.push(`v=${Math.round(Number(state.volume))}`);
-  }
-  if(typeof state.rate !== 'undefined' && state.rate !== null && state.rate !== 1){
-    const r = Math.round(Number(state.rate)*100)/100;
-    flags.push(`r=${r}`);
-  }
-  if(typeof state.muted !== 'undefined' && state.muted === true){
-    flags.push('m=1');
-  }
-  // mode: default is 'contain' — include 'cover' only when coords are default (mutually exclusive with custom position)
-  const modeVal = (state.mode || (coverMode ? 'cover' : 'contain'));
-  if(coordsAreDefault && modeVal === 'cover') flags.push('cover');
-  if(flags.length) parts.push(flags.join(','));
+      const flags = [];
+      if(state.autoplay) flags.push('autoplay');
+      if(state.loop) flags.push('loop');
+      if(state.cover) flags.push('cover');
+      if(flags.length) parts.push(flags.join(','));
 
       const newHash = parts.join('/');
-      // write with replace so we don't create history entries for each tiny change
-      if(newHash) location.replace(location.pathname + (location.search ? ('?' + location.search.replace(/^\?/,'')) : '') + '#' + newHash);
-      else location.replace(location.pathname + (location.search ? ('?' + location.search.replace(/^\?/,'')) : ''));
-    }catch(e){ /* ignore */ }
+      if(newHash) location.replace('#' + newHash);
+      else location.replace('#');
+    }catch(e){}
   }
 
-  // remove common prefixes for shorter hashes, but keep the rest intact
   function compactUrlForHash(full){
     try{
       if(!full) return full;
-      // keep existing percent-encoding
       const decoded = decodeURIComponent(full);
-      // remove scheme and www
       const stripped = decoded.replace(/^https?:\/\//i, '').replace(/^www\./i, '');
       return encodeURIComponent(stripped);
     }catch(e){ return encodeURIComponent(full); }
   }
 
-  // expand compact form back into a usable URL (assume https)
   function expandUrlFromHash(compacted){
     try{
       if(!compacted) return compacted;
       const decoded = decodeURIComponent(compacted);
-      // if it already contains a scheme, return as-is
       if(/^https?:\/\//i.test(decoded)) return decoded;
       return 'https://' + decoded;
     }catch(e){ return decodeURIComponent(compacted || ''); }
@@ -455,687 +140,33 @@
 
   function applyStateToUI(state){
     if(!state) return;
-    if(state.mode){ coverMode = (state.mode === 'cover'); coverBtn.textContent = coverMode ? 'Cover' : 'Contain'; }
-    if(typeof state.lock !== 'undefined'){ try{ lockAspect.checked = !!state.lock; }catch(e){} }
-    if(typeof state.loop !== 'undefined'){ try{ loopChk.checked = !!state.loop; }catch(e){} }
-    // legacy: if w/h provided, set approximate scale relative to viewport
-    const vpW = window.innerWidth, vpH = window.innerHeight;
-    if(state.w) {
-      try{ const nw = Number(state.w); if(Number.isFinite(nw) && nw>0){ currentTransform.s = (nw / Math.max(1, vpW)); } }catch(e){}
-    }
-    if(state.h) {
-      try{ const nh = Number(state.h); if(Number.isFinite(nh) && nh>0 && currentAspect){ currentTransform.s = ( (nh * currentAspect) / Math.max(1, vpW) ); } }catch(e){}
-    }
-  // new transform params: s is unitless; x/y in state are percentages (0..100) when provided via query
-  if(typeof state.s !== 'undefined' && state.s !== null){ try{ currentTransform.s = Number(state.s); }catch(e){} }
-  if(typeof state.x !== 'undefined'){
-    try{ let xv = Number(state.x) || 0; xv = Math.max(0, Math.min(100, xv)); currentTransform.x = Math.round(xv * 100) / 100; }catch(e){}
-  }
-  if(typeof state.y !== 'undefined'){
-    try{ let yv = Number(state.y) || 0; yv = Math.max(0, Math.min(100, yv)); currentTransform.y = Math.round(yv * 100) / 100; }catch(e){}
-  }
-    if(state.url){ urlIn.value = state.url; }
-    if(typeof state.autoplay !== 'undefined'){ try{ autoplayChk.checked = !!state.autoplay; }catch(e){} }
-    // If an embed already exists, apply the parsed transform immediately
-    try{
-    if(typeof state.s !== 'undefined' && state.s !== null && injected && injected.firstElementChild){ const sx = Number(state.x||0); const sy = Number(state.y||0); applyTransform(Number(state.s), sx, sy); }
-    }catch(e){}
+    if(state.url) urlIn.value = state.url;
+    if(typeof state.autoplay !== 'undefined') autoplayChk.checked = !!state.autoplay;
+    if(typeof state.loop !== 'undefined') loopChk.checked = !!state.loop;
+    if(typeof state.cover !== 'undefined') coverChk.checked = !!state.cover;
   }
 
-  // Attach direct manipulation handlers (drag + wheel) to an element
-  function detachDirectManipulation(){
-    try{
-      // remove overlay listeners and overlay element
-      if(activeOverlay){
-        activeOverlay.removeEventListener('pointerdown', onPointerDown);
-        activeOverlay.removeEventListener('wheel', onWheel);
-        try{ activeOverlay.parentNode && activeOverlay.parentNode.removeChild(activeOverlay); }catch(e){}
-        activeOverlay = null;
-      }
-      if(activeContentEl && activeContentEl.style) activeContentEl.style.cursor = '';
-      activeContentEl = null; manipState = null;
-    }catch(e){}
+  // --- Player loading -----------------------------------------------------
+  function shouldUsePlyrAdapter(url){
+    const u = String(url || '').toLowerCase();
+    return u.includes('youtube.com') || u.includes('youtu.be') || u.includes('vimeo.com') || u.match(/\.(mp4|webm|ogg)$/);
   }
-
-  function attachDirectManipulation(el){
-    try{
-      if(!el) return; detachDirectManipulation();
-      if(!panEnabled) return; // only create overlay when pan mode is enabled
-      activeContentEl = el;
-      // find wrapper to host overlay
-      const wrap = (el && el.closest) ? el.closest('.embed-wrapper') : injected.firstElementChild;
-      if(!wrap) return;
-      // create transparent overlay that captures pointer/wheel events reliably (works over iframes)
-      const ov = document.createElement('div');
-      ov.className = 'embed-manip-overlay';
-  ov.style.position = 'absolute'; ov.style.left = '0'; ov.style.top = '0'; ov.style.right = '0'; ov.style.bottom = '0';
-  ov.style.width = '100%'; ov.style.height = '100%'; ov.style.background = 'transparent';
-  // Keep overlay below the floating controls so the handle and buttons remain clickable
-  ov.style.zIndex = '1';
-      ov.style.cursor = 'grab'; ov.style.touchAction = 'none';
-      wrap.appendChild(ov);
-      activeOverlay = ov;
-      activeOverlay.addEventListener('pointerdown', onPointerDown);
-      activeOverlay.addEventListener('wheel', onWheel, {passive:false});
-    }catch(e){ console.warn(e); }
-  }
-
-  function onPointerDown(ev){
-    try{
-      isManipulating = true;
-      ev.preventDefault(); activeContentEl.setPointerCapture && activeContentEl.setPointerCapture(ev.pointerId);
-      activeContentEl.style.cursor = 'grabbing';
-      const s = Number(currentTransform.s) || 1;
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const startPx = (Number(currentTransform.x) || 0) / 100 * vw;
-      const startPy = (Number(currentTransform.y) || 0) / 100 * vh;
-      manipState = { id: ev.pointerId, sx: ev.clientX, sy: ev.clientY, startPx, startPy };
-      function onMove(e){
-        if(!manipState) return;
-        const dx = e.clientX - manipState.sx; const dy = e.clientY - manipState.sy;
-        const px = manipState.startPx + dx; const py = manipState.startPy + dy;
-        const nx = (px / vw) * 100; const ny = (py / vh) * 100;
-        // update transform
-        applyTransform(Number(currentTransform.s) || 1, nx, ny);
-      }
-      function onUp(e){
-        try{ window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); activeContentEl.style.cursor = 'grab'; activeContentEl.releasePointerCapture && activeContentEl.releasePointerCapture(ev.pointerId); manipState = null; // persist
-          // flush debounced write now that interaction ended
-          flushManipulationWrite();
-          isManipulating = false;
-        }catch(e){}
-      }
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp, {once:true});
-    }catch(e){ console.warn(e); }
-  }
-
-  function onWheel(ev){
-    try{
-      ev.preventDefault();
-      const delta = ev.deltaY;
-      const factor = Math.exp(-delta * 0.0015); // smooth zoom
-      const oldS = Number(currentTransform.s) || 1;
-      let newS = Math.max(0.05, Math.min(8, oldS * factor));
-      // zoom around cursor: adjust x/y so point under cursor remains fixed
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const mx = ev.clientX, my = ev.clientY;
-      const px = (Number(currentTransform.x) || 0) / 100 * vw;
-      const py = (Number(currentTransform.y) || 0) / 100 * vh;
-      // vector from center to mouse
-      const cx = vw/2, cy = vh/2;
-      const dx = mx - cx, dy = my - cy;
-      // when scaling, the content moves by (1 - newS/oldS) * (dx,dy)
-      const pxNew = px + dx * (1 - newS/oldS);
-      const pyNew = py + dy * (1 - newS/oldS);
-      const nx = (pxNew / vw) * 100; const ny = (pyNew / vh) * 100;
-      // apply
-      applyTransform(newS, nx, ny);
-      // schedule debounced write (don't hammer the hash while the user is still scrolling)
-      scheduleManipulationWrite({ url: urlIn.value.trim(), mode: coverMode ? 'cover' : 'contain', s: newS, x: nx, y: ny, lock: lockAspect.checked, autoplay: autoplayChk.checked });
-    }catch(e){ console.warn(e); }
-  }
-
-  function scheduleManipulationWrite(state){
-    try{
-      try{ console.debug('[embed] scheduleManipulationWrite', {t:performance.now(), state}); }catch(e){}
-      _lastQueuedState = state;
-      isManipulating = true;
-      if(_manipWriteTimer) clearTimeout(_manipWriteTimer);
-      _manipWriteTimer = setTimeout(()=>{
-        try{ if(_lastQueuedState) writeHash(_lastQueuedState); }catch(e){}
-        _manipWriteTimer = null; _lastQueuedState = null; isManipulating = false;
-      }, MANIP_DEBOUNCE_MS);
-    }catch(e){}
-  }
-
-  function flushManipulationWrite(){
-    try{
-      try{ console.debug('[embed] flushManipulationWrite', {t:performance.now(), _lastQueuedState}); }catch(e){}
-      if(_manipWriteTimer){ clearTimeout(_manipWriteTimer); _manipWriteTimer = null; }
-      if(_lastQueuedState){ writeHash(_lastQueuedState); _lastQueuedState = null; }
-    }catch(e){}
-  }
-
-  // read initial hash and restore
-  try{
-  const initial = normalizeState(parseHash());
-  // keep initial parsed state so sizeInjected can access it during initial load
-  window.__embed_initial_state = initial;
-  if(Object.keys(initial).length){ applyStateToUI(initial); echoStateImmediately(initial); if(initial.url) { setTimeout(()=>{ loadUrl(initial.url); }, 20); } }
-  }catch(e){}
-
-  // handle external hash changes
-  window.addEventListener('hashchange', ()=>{
-    // ignore hash updates while the user is manipulating the embed
-    if(isManipulating) return;
-    const s = parseHash();
-    
-    try {
-      const cur = (urlIn && urlIn.value) ? urlIn.value.trim() : '';
-      const parsedUrl = s.url ? s.url.trim() : '';
-      
-      // Normalize both URLs for comparison (handle encoding differences)
-      const normalizUrl = (u) => {
-        try {
-          if (!u) return '';
-          // Expand and then parse to normalize
-          const expanded = expandUrlFromHash(u);
-          const url = new URL(expanded, location.href);
-          return url.href.toLowerCase();
-        } catch(e) {
-          return String(u || '').toLowerCase();
-        }
-      };
-      
-      const normalizedCur = normalizUrl(cur);
-      const normalizedParsed = normalizUrl(parsedUrl);
-      const urlChanged = normalizedParsed && (normalizedCur !== normalizedParsed);
-
-      // Apply state to UI and echo immediately
-      applyStateToUI(s);
-      echoStateImmediately(s);
-
-      // If URL changed, always reload
-      if(urlChanged){
-        if(parsedUrl){ loadUrl(parsedUrl); }
-        return;
-      }
-
-      // URL hasn't changed - update parameters in place
-      // If using PlayerAdapter, apply state directly
-      if(playerMode && playerAdapter && parsedUrl){
-        try{ 
-          applyPlayerState(s); 
-          // Also update transform if s/x/y changed
-          if(typeof s.s !== 'undefined' || typeof s.x !== 'undefined' || typeof s.y !== 'undefined'){
-            applyOrQueueState(s);
-          }
-        }catch(e){ console.warn('applyPlayerState failed', e); }
-        return;
-      }
-
-      // If an iframe is currently injected, reload it with updated parameters
-      try{
-        const wrap = injected.firstElementChild;
-        const iframe = wrap && wrap.querySelector && wrap.querySelector('iframe');
-        if(iframe && parsedUrl){
-          // Force reload with new parameters by reconstructing and reassigning src
-          try{
-            let newSrc = parsedUrl; // Start fresh from the base URL
-            if(isVimeoUrl(newSrc)) {
-              newSrc = patchVimeoParams(newSrc, {autoplay: !!s.autoplay, loop: !!s.loop});
-            } else {
-              try{ 
-                const u = new URL(newSrc, location.href); 
-                if(s.autoplay) { 
-                  u.searchParams.set('autoplay','1'); 
-                  u.searchParams.set('mute','1'); 
-                } else { 
-                  u.searchParams.delete('autoplay'); 
-                }
-                if(s.loop) {
-                  u.searchParams.set('loop','1'); 
-                } else { 
-                  u.searchParams.delete('loop'); 
-                }
-                newSrc = u.toString(); 
-              }catch(e){ /* ignore URL ctor errors */ }
-            }
-            // Force reload by changing src (even if it appears the same, params may have changed)
-            iframe.src = newSrc;
-            // ensure allow attribute includes autoplay
-            try{ iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture'); }catch(e){}
-            // Update transform if s/x/y changed
-            if(typeof s.s !== 'undefined' || typeof s.x !== 'undefined' || typeof s.y !== 'undefined'){
-              applyOrQueueState(s);
-            }
-            return;
-          }catch(e){ console.warn('iframe src update failed', e); }
-        }
-      }catch(e){}
-
-      // Fallback: if we have a URL, load it
-      if(parsedUrl){ loadUrl(parsedUrl); }
-    } catch (e) { console.warn('hashchange handler error', e); }
-  });
-
-  function findProvider(url){
-    try{ for(const p of providers) if(p.match.test(url)) return p; }catch(e){}
-    return null;
-  }
-
-  function sanitizeAndStripAttrs(html){
-    try{
-      if(window.DOMPurify && window.DOMPurify.sanitize){
-        const ALLOWED_TAGS = [
-          'a','b','i','strong','em','p','div','span','img','figure','figcaption',
-          'iframe','video','source','picture','svg','path','h1','h2','h3','h4','h5','h6',
-          'ul','ol','li','br','hr','blockquote'
-        ];
-        const ALLOWED_ATTR = ['href','src','srcset','alt','title','width','height','class','id','allow','allowfullscreen','frameborder','loading','type','media','controls','poster','muted','playsinline','style'];
-        return window.DOMPurify.sanitize(html, {ALLOWED_TAGS, ALLOWED_ATTR});
-      }
-    }catch(e){ /* fall through to fallback */ }
-    // fallback: strip scripts and inline event handlers conservatively
-    html = html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-    html = html.replace(/\s(on[\w-]+)=(["'])(.*?)\2/gi, '');
-    return html;
-  }
-
-  async function fetchOembed(url){
-    const p = findProvider(url);
-    if(!p) throw new Error('Unknown provider');
-    const endpoint = p.endpoint + encodeURIComponent(url);
-    const res = await fetch(endpoint, {mode:'cors'});
-    if(!res.ok) throw new Error('oEmbed fetch failed: '+res.status);
-    const data = await res.json();
-    return {provider:p.name, data};
-  }
-
-  function injectHtml(html, meta){
-    injected.innerHTML = '';
-    embedLoaded = false; pendingState = null;
-    const wrap = document.createElement('div'); wrap.className = 'embed-wrapper';
-    wrap.innerHTML = html;
-    // prefer iframe or video inside the wrapper
-    const iframe = wrap.querySelector('iframe');
-    const video = wrap.querySelector('video');
-    let el = iframe || video || wrap.firstElementChild;
-
-    // try to capture intrinsic/original dimensions before we strip attributes
-    try{
-      const tryNum = v=>{ const n = Number(v); return (Number.isFinite(n) && n>0) ? n : null };
-      const origW = tryNum(meta && meta.width) || tryNum(el && el.getAttribute && el.getAttribute('width')) || (el && el.naturalWidth) || (el && el.videoWidth) || null;
-      const origH = tryNum(meta && meta.height) || tryNum(el && el.getAttribute && el.getAttribute('height')) || (el && el.naturalHeight) || (el && el.videoHeight) || null;
-      if(origW) wrap.dataset.origW = String(origW);
-      if(origH) wrap.dataset.origH = String(origH);
-    }catch(e){ /* ignore */ }
-
-    // strip inline width/height/style and ensure responsiveness
-    if(el && el.removeAttribute){ el.removeAttribute('width'); el.removeAttribute('height'); el.removeAttribute('style'); }
-
-  // if it's an iframe, set responsive max sizes but don't force width/height so sizing logic can control it
-  if(iframe){ iframe.style.maxWidth = '100%'; iframe.style.maxHeight = '100%'; iframe.style.display = 'block'; }
-    if(video){ video.style.maxWidth = '100%'; video.style.maxHeight = '100%'; }
-
-  injected.appendChild(wrap);
-
-    // After injection, allow layout to settle then size
-    requestAnimationFrame(()=>{
-      try{
-        // attach load handlers to detect when the embedded content is ready
-        try{
-          const innerI = wrap.querySelector && wrap.querySelector('iframe');
-          const innerImg = wrap.querySelector && wrap.querySelector('img');
-          const innerVideo = wrap.querySelector && wrap.querySelector('video');
-          if(innerI){ innerI.addEventListener('load', onEmbedReady, {once:true}); }
-          if(innerImg){ if(innerImg.complete) onEmbedReady(); else innerImg.addEventListener('load', onEmbedReady, {once:true}); }
-          if(innerVideo){ if(innerVideo.readyState >= 1) onEmbedReady(); else innerVideo.addEventListener('loadedmetadata', onEmbedReady, {once:true}); }
-        }catch(e){}
-  // if autoplay/loop requested, patch iframe src (especially Vimeo) and enable attributes
-  try{
-    const innerI = wrap.querySelector && wrap.querySelector('iframe');
-    if(innerI && innerI.src){
-      let newSrc = innerI.src;
-      if(autoplayChk && autoplayChk.checked){
-        // Vimeo: use muted=1; others: try generic autoplay param as well
-        if(isVimeoUrl(newSrc)) newSrc = patchVimeoParams(newSrc, {autoplay:true, loop: !!(loopChk && loopChk.checked)});
-        else { try{ const u = new URL(newSrc, location.href); u.searchParams.set('autoplay','1'); u.searchParams.set('mute','1'); newSrc = u.toString(); }catch(e){} }
-        innerI.setAttribute('allow','autoplay; encrypted-media; picture-in-picture');
-      }
-      if(loopChk && loopChk.checked){
-        if(isVimeoUrl(newSrc)) newSrc = patchVimeoParams(newSrc, {autoplay: !!(autoplayChk && autoplayChk.checked), loop: true});
-        else { try{ const uL = new URL(newSrc, location.href); uL.searchParams.set('loop','1'); newSrc = uL.toString(); }catch(e){} }
-      }
-      if(newSrc !== innerI.src) innerI.src = newSrc;
-    }
-    // also handle native <video>
-    const innerV = wrap.querySelector && wrap.querySelector('video');
-    if(innerV){
-      // Ensure native videos honor autoplay/loop reliably
-      if(loopChk && loopChk.checked){ try{ innerV.setAttribute('loop',''); innerV.loop = true; }catch(e){} }
-      if(autoplayChk && autoplayChk.checked){
-        try{
-          innerV.setAttribute('autoplay','');
-          innerV.autoplay = true;
-          innerV.setAttribute('muted','');
-          innerV.muted = true;
-          innerV.setAttribute('playsinline','');
-        }catch(e){}
-      }
-    }
-  }catch(e){}
-        sizeInjected(el, meta);
-  // if the injected html contains an iframe, hide the floating UI
-  // but only when this page is itself embedded inside another frame
-  try{ if(wrap.querySelector && wrap.querySelector('iframe')){ if(window.top !== window.self){ hideFloatingUI(); } } }catch(e){}
-        // animate floating UI down to bottom so it's out of the way
-        try{ animateFloatingToBottom(); }catch(e){}
-      }catch(e){ console.warn(e); }
-    });
-  }
-
-  function injectIframe(url, meta){
-    injected.innerHTML = '';
-    embedLoaded = false; pendingState = null;
-    const wrap = document.createElement('div'); wrap.className = 'embed-wrapper';
-    const iframe = document.createElement('iframe');
-    // if autoplay/loop requested, append params (special handling for Vimeo)
-    try{
-      let src = url;
-      const wantAutoplay = !!(autoplayChk && autoplayChk.checked);
-      const wantLoop = !!(loopChk && loopChk.checked);
-      if(isVimeoUrl(src)){
-        src = patchVimeoParams(src, {autoplay: wantAutoplay, loop: wantLoop});
-      } else {
-        if(wantAutoplay){ try{ const u = new URL(src, location.href); u.searchParams.set('autoplay','1'); u.searchParams.set('mute','1'); src = u.toString(); }catch(e){ src = src + (src.indexOf('?')===-1 ? '?':'&') + 'autoplay=1&mute=1'; } }
-        if(wantLoop){ try{ const uL = new URL(src, location.href); uL.searchParams.set('loop','1'); src = uL.toString(); }catch(e){ src = src + (src.indexOf('?')===-1 ? '?':'&') + 'loop=1'; } }
-      }
-      iframe.src = src;
-    }catch(e){ iframe.src = url; }
-    iframe.setAttribute('allowfullscreen','');
-    iframe.style.display = 'block';
-    iframe.style.border = '0';
-    iframe.style.maxWidth = '100%';
-    iframe.style.maxHeight = '100%';
-    // allow autoplay APIs
-    try{ iframe.setAttribute('allow', (iframe.getAttribute('allow')||'') + ' autoplay; encrypted-media; picture-in-picture'); }catch(e){}
-    wrap.appendChild(iframe);
-    // store any intrinsic dims we know (meta from oEmbed if available)
-    try{
-      const tryNum = v=>{ const n = Number(v); return (Number.isFinite(n) && n>0) ? n : null };
-      const origW = tryNum(meta && meta.width) || null;
-      const origH = tryNum(meta && meta.height) || null;
-      if(origW) wrap.dataset.origW = String(origW);
-      if(origH) wrap.dataset.origH = String(origH);
-    }catch(e){ }
-
-    injected.appendChild(wrap);
-  // hide the floating UI when we inject a direct iframe — only when this page
-  // is embedded inside another frame. Keep the UI visible when running as top.
-  try{ if(window.top !== window.self){ hideFloatingUI(); } }catch(e){}
-    requestAnimationFrame(()=>{ try{ iframe.addEventListener('load', onEmbedReady, {once:true}); sizeInjected(iframe, meta); animateFloatingToBottom(); }catch(e){ console.warn(e); } });
-  }
-
-  // Animate the floating UI down to the bottom center of the viewport
-  function animateFloatingToBottom(){
-    try{
-      // stop any ongoing drag
-      floating.style.transition = 'transform 600ms ease, top 600ms ease, left 600ms ease';
-      // compute bottom center
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const r = floating.getBoundingClientRect();
-      const targetLeft = Math.round((vw - r.width)/2);
-      const targetTop = Math.round(vh - r.height - 20); // 20px margin
-      // set absolute positioning coordinates
-      floating.style.left = targetLeft + 'px';
-      floating.style.top = targetTop + 'px';
-      floating.style.transform = 'translate(0,0)';
-      // release transition after it ends
-      setTimeout(()=>{ floating.style.transition = ''; }, 700);
-    }catch(e){}
-  }
-
-  function hideFloatingUI(){
-    try{
-      floating.style.transition = 'opacity 300ms ease, visibility 0ms linear 300ms';
-      floating.style.opacity = '0';
-      floating.style.pointerEvents = 'none';
-      // keep it visually present but hidden so layout calculations remain stable
-    }catch(e){}
-  }
-
-  function showFloatingUI(){
-    try{
-      floating.style.transition = 'opacity 200ms ease';
-      floating.style.opacity = '1';
-      floating.style.pointerEvents = '';
-      // clear visibility transition delay
-      setTimeout(()=>{ floating.style.transition = ''; }, 300);
-    }catch(e){}
-  }
-
-  function sizeInjected(el, meta){
-    // Decide sizing strategy: prefer meta.width/meta.height, else element bounding box, else cover
-    const vpW = window.innerWidth; const vpH = window.innerHeight;
-    let w = null, h = null;
-    // prefer any stored original dims on the wrapper (set at inject time)
-    try{
-      const wrap = (el && el.closest) ? el.closest('.embed-wrapper') : injected.firstElementChild;
-      if(wrap && wrap.dataset && wrap.dataset.origW && wrap.dataset.origH){
-        const ow = Number(wrap.dataset.origW), oh = Number(wrap.dataset.origH);
-        if(Number.isFinite(ow) && Number.isFinite(oh) && ow>0 && oh>0){ w = ow; h = oh; }
-      }
-    }catch(e){ /* ignore */ }
-    if(meta && meta.width && meta.height){ w = meta.width; h = meta.height; }
-    // bounding box fallback
-    try{
-      const r = el.getBoundingClientRect(); if(r.width && r.height){ w = w || r.width; h = h || r.height; }
-    }catch(e){}
-
-    // If we have dims, apply them but prefer 'contain' for video-like content to avoid cropping
-    if(w && h){
-      console.debug('[embed] sizeInjected meta', {meta, w, h});
-      const ar = w/h;
-      const nodeName = (el && el.nodeName) ? el.nodeName.toLowerCase() : '';
-  const isVideoLike = nodeName === 'video' || nodeName === 'iframe' || (meta && meta.type === 'video');
-  // if user explicitly set coverMode=true allow cover even for video-like embeds; otherwise prefer contain
-  const effectiveCover = coverMode ? true : (!isVideoLike);
-      console.debug('[embed] sizeInjected vp', {vpW, vpH, nodeName, isVideoLike, coverMode, effectiveCover});
-      if(effectiveCover){
-        // cover: keep the wrapper exactly the viewport size and scale/position the inner
-        // element so it fills and is centered (overflow:hidden) — avoids making the
-        // wrapper taller than the viewport while still covering it.
-        const wrap = el && el.closest ? el.closest('.embed-wrapper') : injected.firstElementChild;
-        if(!wrap) return;
-        // ensure numeric
-        w = Number(w); h = Number(h);
-        // avoid accidental tiny sizes - enforce sensible minimums
-        const MIN_HEIGHT = 240;
-        if(h && h < MIN_HEIGHT){
-          const scaleUp = MIN_HEIGHT / h;
-          w = Math.round(w * scaleUp);
-          h = Math.round(h * scaleUp);
-        }
-        if(w && h){
-          // compute scale to cover the viewport and final pixel sizes
-          const scale = Math.max(vpW / w, vpH / h, 1);
-          const contentW = Math.round(w * scale);
-          const contentH = Math.round(h * scale);
-          // set wrapper to viewport and hide overflow; make it the containing block
-          wrap.style.width = vpW + 'px';
-          wrap.style.height = vpH + 'px';
-          wrap.style.overflow = 'hidden';
-          wrap.style.position = 'relative';
-          wrap.style.display = 'block';
-          // pick the actual content element (iframe/video/img) if el is a wrapper div
-          let contentEl = el;
-          try{ if(contentEl && contentEl.nodeName && contentEl.nodeName.toLowerCase() === 'div'){ const found = contentEl.querySelector && contentEl.querySelector('iframe,video,img'); if(found) contentEl = found; } }catch(e){}
-          // size the actual content element to the scaled content size and center it using absolute positioning
-          try{
-            if(contentEl && contentEl.style){
-              // set final pixel size directly on the embedded element (no CSS scale)
-              contentEl.style.maxWidth = 'none'; contentEl.style.maxHeight = 'none';
-              contentEl.style.width = contentW + 'px';
-              contentEl.style.height = contentH + 'px';
-              contentEl.style.position = 'absolute';
-              contentEl.style.left = '50%';
-              contentEl.style.top = '50%';
-              contentEl.style.transform = 'translate(-50%,-50%)';
-            }
-          }catch(e){}
-          try{
-            const wrapRect = wrap.getBoundingClientRect(); const contentRect = (contentEl && contentEl.getBoundingClientRect) ? contentEl.getBoundingClientRect() : null;
-            console.debug('[embed] sizeInjected scale', {scale, contentW, contentH, usedOrig:{w,h}, targeted: (contentEl && contentEl.nodeName), wrapRect, contentRect});
-          }catch(e){}
-          showSizeControls(vpW, vpH);
-          // enable direct manipulation (drag + wheel zoom) on the content element
-          try{ attachDirectManipulation(contentEl); }catch(e){}
-          // if hash encodes a transform (s/x/y), apply it now so shared URLs restore visuals
-            try{
-              // Use the effective (merged) state so re-injections use the latest hash/query values
-              const st = getEffectiveState();
-              if(st){
-                // If legacy w/h exist without s, attempt to map them to a scale and center (x=50,y=50)
-                if((typeof st.s === 'undefined' || st.s === null) && st.w){
-                  // approximate scale so original width maps proportionally to viewport
-                  const approxS = Number(st.w) / Math.max(1, vpW);
-                  st.s = approxS;
-                  // center by default
-                  st.x = (typeof st.x === 'undefined') ? 50 : st.x;
-                  st.y = (typeof st.y === 'undefined') ? 50 : st.y;
-                }
-                if(typeof st.s !== 'undefined' && st.s !== null){
-                  // ensure x/y are treated as percentages
-                  const sx = Number(st.x || 0);
-                  const sy = Number(st.y || 0);
-                  // apply transform after layout settles
-                  requestAnimationFrame(()=>{ applyTransform(Number(st.s), sx, sy); });
-                  // reflect parsed values into internal state
-                  try{ currentTransform.s = Number(st.s); currentTransform.x = sx; currentTransform.y = sy; }catch(e){}
-                }
-              }
-            }catch(e){}
-        } else {
-          // fallback: use viewport
-          wrap.style.width = vpW + 'px'; wrap.style.height = vpH + 'px'; wrap.style.overflow = 'hidden';
-          showSizeControls(vpW, vpH);
-            try{ const st = getEffectiveState(); if(st && typeof st.s !== 'undefined' && st.s !== null){ requestAnimationFrame(()=>{ applyTransform(Number(st.s), Number(st.x||0), Number(st.y||0)); currentTransform.s = Number(st.s); currentTransform.x = Number(st.x||0); currentTransform.y = Number(st.y||0); }); } }catch(e){}
-        }
-      } else {
-        // contain: size wrapper to viewport then scale inner element to fit entirely without cropping
-        const wrap = el && el.closest ? el.closest('.embed-wrapper') : injected.firstElementChild;
-        if(!wrap) return;
-  wrap.style.width = vpW + 'px'; wrap.style.height = vpH + 'px'; wrap.style.overflow = 'hidden'; wrap.style.position = 'relative'; wrap.style.maxWidth = 'none'; wrap.style.maxHeight = 'none';
-  // compute scale to fit inside viewport (allow upscaling so small embeds grow to fit)
-  const scale = Math.min(vpW / w, vpH / h);
-        const contentW = Math.round(w * scale);
-        const contentH = Math.round(h * scale);
-  // pick actual inner element if el is a wrapper
-        let contentEl = el;
-        try{ if(contentEl && contentEl.nodeName && contentEl.nodeName.toLowerCase() === 'div'){ const found = contentEl.querySelector && contentEl.querySelector('iframe,video,img'); if(found) contentEl = found; } }catch(e){}
-        try{
-          if(contentEl && contentEl.style){
-            // set final pixel size (no CSS scale)
-            contentEl.style.maxWidth = 'none'; contentEl.style.maxHeight = 'none';
-            contentEl.style.width = contentW + 'px';
-            contentEl.style.height = contentH + 'px';
-            contentEl.style.position = 'absolute';
-            contentEl.style.left = '50%'; contentEl.style.top = '50%';
-            contentEl.style.transform = 'translate(-50%,-50%)';
-          }
-        }catch(e){}
-        try{
-          const wrapRect = wrap.getBoundingClientRect(); const contentRect = (contentEl && contentEl.getBoundingClientRect) ? contentEl.getBoundingClientRect() : null;
-          console.debug('[embed] sizeInjected contain', {vpW, vpH, w, h, scale, contentW, contentH, targeted: (contentEl && contentEl.nodeName), wrapRect, contentRect});
-        }catch(e){}
-        showSizeControls(contentW, contentH);
-        try{ attachDirectManipulation(contentEl); }catch(e){}
-      }
-    } else {
-      // no dims — default to cover viewport (but for video-like prefer contain)
-    applySize(vpW, vpH);
-  try{ const st = getEffectiveState(); if(st && typeof st.s !== 'undefined' && st.s !== null){ requestAnimationFrame(()=>{ applyTransform(Number(st.s), Number(st.x||0), Number(st.y||0)); currentTransform.s = Number(st.s); currentTransform.x = Number(st.x||0); currentTransform.y = Number(st.y||0); }); } }catch(e){}
-  // try to attach to any content element present
-  try{ const wrap = injected.firstElementChild; const contentEl = wrap && wrap.querySelector && wrap.querySelector('iframe,video,img') || (wrap && wrap.firstElementChild); if(contentEl) attachDirectManipulation(contentEl); }catch(e){}
-    }
-  }
-
-  function applySize(w,h){
-    // set injected wrapper to the size and center it
-    const wrap = injected.firstElementChild;
-    if(!wrap) return;
-    wrap.style.width = w + 'px';
-    wrap.style.height = h + 'px';
-    wrap.style.maxWidth = '100%'; wrap.style.maxHeight = '100%';
-    wrap.style.display = 'flex'; wrap.style.alignItems = 'center'; wrap.style.justifyContent = 'center';
-  }
-
-  function applyTransform(scale = 1, x = 0, y = 0){
-    // Apply CSS transform to the embedded content (centered by default)
-    const wrap = injected.firstElementChild;
-    if(!wrap) return;
-    let contentEl = wrap.querySelector('iframe,video,img') || wrap.firstElementChild;
-    if(!contentEl) return;
-    // ensure the content is positioned absolutely at center for transform to work
-    try{
-        if(contentEl.style){
-          try{ console.debug('[embed] applyTransform start', {t:performance.now(), scale, x, y}); }catch(e){}
-        contentEl.style.position = 'absolute';
-        contentEl.style.left = '50%';
-        contentEl.style.top = '50%';
-        // x/y are percentages of viewport: convert to pixels for translation
-        const px = Math.round((Number(x) / 100) * window.innerWidth || 0);
-        const py = Math.round((Number(y) / 100) * window.innerHeight || 0);
-        // translate by px/py (pixels) then center and scale
-        contentEl.style.transform = `translate(${px}px, ${py}px) translate(-50%, -50%) scale(${scale})`;
-        contentEl.style.transformOrigin = '50% 50%';
-        try{ console.debug('[embed] applyTransform css set'); }catch(e){}
-      }
-    }catch(e){ /* ignore */ }
-    // update internal state (rounded)
-    try{
-      const s = Number(scale) || 1;
-      const sx = Math.round((Number(x) || 0) * 100) / 100;
-      const sy = Math.round((Number(y) || 0) * 100) / 100;
-      currentTransform = { s, x: sx, y: sy };
-      try{ console.debug('[embed] currentTransform updated', currentTransform); }catch(e){}
-    }catch(e){}
-  }
-
-  function showSizeControls(w,h){
-    if(!sizeControls) return;
-    const vpW = window.innerWidth, vpH = window.innerHeight;
-    // default to viewport sizes if not provided
-  sizeControls.style.display = 'flex';
-  // default scale and positions (now internal)
-  currentTransform.s = currentTransform.s || 1;
-  currentTransform.x = (typeof currentTransform.x !== 'undefined') ? currentTransform.x : 0;
-  currentTransform.y = (typeof currentTransform.y !== 'undefined') ? currentTransform.y : 0;
-    currentAspect = (w && h) ? (w / h) : null;
-    // lock proportions by default when controls appear
-    try{ lockAspect.checked = true; }catch(e){}
-  }
-
-  function hideSizeControls(){ if(sizeControls) sizeControls.style.display='none'; }
 
   async function loadUrl(u){
     if(!u) return;
 
-    // Check if we should use PlayerAdapter (YouTube, Vimeo, HTML5 video)
-    if(shouldUsePlyrAdapter(u)){
-      await loadWithAdapter(u);
+    if(!shouldUsePlyrAdapter(u)){
+      console.warn('Only YouTube, Vimeo, and direct video files are supported');
       return;
     }
 
-    // Otherwise, use oEmbed path for TikTok/Twitter/etc
-    try{
-      // try oEmbed fetch
-      const {provider, data} = await fetchOembed(u);
-      lastData = {provider, data};
-      if(data.html){
-        const html = sanitizeAndStripAttrs(data.html);
-        injectHtml(html, {width: data.width, height: data.height, type: data.type});
-      } else if(data.type === 'photo' && data.url){
-        injectHtml(`<img src="${data.url}" alt="embed" style="max-width:100%">`, {width: data.width, height: data.height, type: data.type});
-      } else {
-        // fallback to iframe
-        injectIframe(u, {width: data.width, height: data.height, type: data.type});
-      }
-    }catch(err){
-      // if oEmbed failed, try direct iframe
-      console.warn('oEmbed failed, falling back to iframe', err);
-      injectIframe(u, null);
-    }
-  }
-
-  async function loadWithAdapter(u){
     try{
       // Destroy any existing adapter
-      if(playerAdapter){ try{ playerAdapter.destroy(); }catch(e){} playerAdapter = null; }
+      if(playerAdapter){ 
+        try{ playerAdapter.destroy(); }catch(e){} 
+        playerAdapter = null; 
+      }
       injected.innerHTML = '';
-      embedLoaded = false; pendingState = null; playerMode = true;
 
       // Create wrapper and adapter
       const wrap = document.createElement('div');
@@ -1144,176 +175,170 @@
 
       playerAdapter = window.createAdapter(wrap, u);
       
-      // Wire player events BEFORE loading (so we catch 'ready')
+      // Wire player events
       playerAdapter.on('ready', () => {
-        embedLoaded = true;
-        // Apply parsed state from hash
-        const st = getEffectiveState();
-        console.log('[embed] Player ready, applying state:', st);
+        const st = parseHash();
+        console.log('[embed] Player ready, state:', st);
+        
+        // Toggle cover class
+        if(st.cover){
+          injected.classList.add('cover');
+        } else {
+          injected.classList.remove('cover');
+        }
+        
+        // Apply player state
         applyPlayerState(st);
+        
         // Auto-hide UI if embedded
         try{ if(window.top !== window.self){ hideFloatingUI(); } }catch(e){}
         animateFloatingToBottom();
       });
 
-      // Seeked event (user scrubbed) → write hash
-      playerAdapter.on('seeked', () => {
-        const ct = playerAdapter.getCurrentTime();
-        schedulePlayerHashWrite({ t: ct });
-      });
-
-      // Timeupdate for periodic state reflection (optional; mainly for segment enforcement)
-      playerAdapter.on('timeupdate', () => {
-        // Could emit to scroll position or other UI here
-      });
-
-      // Load the player (this will trigger 'ready' event)
+      // Load the player
       await playerAdapter.load(u);
 
-      // Apply current sizing (cover/contain)
-      try{ sizeInjected(wrap.firstElementChild || wrap, null); }catch(e){}
-
     }catch(err){
-      console.error('PlayerAdapter load failed', err);
-      playerMode = false;
+      console.error('Player load failed', err);
     }
   }
 
   function applyPlayerState(state){
     if(!playerAdapter || !playerAdapter.ready) return;
     console.log('[embed] applyPlayerState', state);
+    
     try{
-      // Apply muting BEFORE autoplay (required for autoplay policy)
+      // Apply muting for autoplay
       if(state.autoplay){
-        // Autoplay requires muted
-        console.log('[embed] Setting muted for autoplay');
         playerAdapter.setMuted(true);
-      } else if(typeof state.muted !== 'undefined'){
-        playerAdapter.setMuted(state.muted);
       }
       
-      // Apply volume, rate, loop
-      if(typeof state.volume !== 'undefined') playerAdapter.setVolume(state.volume);
-      if(typeof state.rate !== 'undefined') playerAdapter.setRate(state.rate);
-      
-      // Apply segment or loop
-      if(typeof state.tStart !== 'undefined'){
-        if(typeof state.tEnd !== 'undefined'){
-          // Segment loop
-          playerAdapter.setSegment(state.tStart, state.tEnd, !!state.loop);
-        } else {
-          // Seek to timestamp
-          playerAdapter.seek(state.tStart);
-        }
-      } else if(typeof state.loop !== 'undefined'){
-        playerAdapter.setLoop(state.loop);
+      // Apply loop
+      if(state.loop){
+        playerAdapter.setLoop(true);
       }
       
-      // Start playback AFTER everything is configured
+      // Start playback
       if(state.autoplay){
-        console.log('[embed] Calling play()');
         playerAdapter.play().then(() => {
           console.log('[embed] Autoplay succeeded');
         }).catch(e => {
           console.warn('[embed] Autoplay failed:', e);
         });
       }
-    }catch(e){ console.warn('applyPlayerState error', e); }
+    }catch(e){ 
+      console.warn('applyPlayerState error', e); 
+    }
   }
 
-  function schedulePlayerHashWrite(partialState){
-    // Merge with current state and schedule debounced write
-    const st = getEffectiveState();
-    const merged = Object.assign({}, st, partialState);
-    merged.url = urlIn.value.trim();
-    scheduleManipulationWrite(merged);
+  // --- UI helpers ---------------------------------------------------------
+  function animateFloatingToBottom(){
+    try{
+      floating.style.transition = 'transform 600ms ease, top 600ms ease, left 600ms ease';
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const r = floating.getBoundingClientRect();
+      const targetLeft = Math.round((vw - r.width)/2);
+      const targetTop = Math.round(vh - r.height - 20);
+      floating.style.left = targetLeft + 'px';
+      floating.style.top = targetTop + 'px';
+      floating.style.transform = 'translate(0,0)';
+      setTimeout(()=>{ floating.style.transition = ''; }, 700);
+    }catch(e){}
   }
 
-  // UI wiring
+  function hideFloatingUI(){
+    try{
+      floating.style.transition = 'opacity 300ms ease';
+      floating.style.opacity = '0';
+      floating.style.pointerEvents = 'none';
+    }catch(e){}
+  }
+
+  // --- Event handlers -----------------------------------------------------
   loadBtn.addEventListener('click', ()=>{
     const u = urlIn.value.trim();
+    if(!u) return;
     loadUrl(u);
-    // write current transform state (prefer s/x/y)
-    const s = Number(currentTransform.s) || null;
-    // UI x/y are percentages 0..100 — store as-is
-    const x = Number(currentTransform.x) || 0;
-    const y = Number(currentTransform.y) || 0;
-    writeHash({ url: u, mode: coverMode ? 'cover' : 'contain', s: s, x: x, y: y, lock: lockAspect.checked, autoplay: autoplayChk.checked, loop: loopChk.checked });
+    writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked });
   });
-  // ...existing code...
+
   clearBtn.addEventListener('click', ()=>{
-    try{ detachDirectManipulation(); }catch(e){}
-    if(playerAdapter){ try{ playerAdapter.destroy(); }catch(e){} playerAdapter = null; }
-    playerMode = false;
-    injected.innerHTML=''; urlIn.value=''; lastData = null; hideSizeControls();
-    embedLoaded = false; pendingState = null;
+    if(playerAdapter){ 
+      try{ playerAdapter.destroy(); }catch(e){} 
+      playerAdapter = null; 
+    }
+    injected.innerHTML=''; 
+    urlIn.value='';
     writeHash({});
-    try{ showFloatingUI(); }catch(e){}
   });
-  coverBtn.addEventListener('click', ()=>{
-    coverMode = !coverMode; coverBtn.textContent = coverMode ? 'Cover' : 'Contain';
-    // when switching to cover/contain, remove any custom transform (x,y,s)
-    currentTransform = { s: 1, x: 0, y: 0 };
-    // re-run sizing on current embed so the toggle takes effect immediately
-    const el = injected.querySelector('.embed-wrapper iframe, .embed-wrapper video, .embed-wrapper img, .embed-wrapper > *');
-    if (el) {
-      try {
-        sizeInjected(el, lastData ? lastData.data : null);
-        // write hash without s/x/y so positioning is viewport-based
-        writeHash({ url: urlIn.value.trim(), mode: coverMode ? 'cover' : 'contain', lock: lockAspect.checked, autoplay: autoplayChk.checked, loop: loopChk.checked });
-      } catch (e) { console.warn(e); }
+
+  autoplayChk.addEventListener('change', ()=>{ 
+    writeHash({ url: urlIn.value.trim(), autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked }); 
+  });
+  
+  loopChk.addEventListener('change', ()=>{ 
+    writeHash({ url: urlIn.value.trim(), autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked }); 
+  });
+
+  coverChk.addEventListener('change', ()=>{
+    const u = urlIn.value.trim();
+    if(u){
+      loadUrl(u);
+      writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked });
     }
   });
 
-  // size control handlers
-  // numeric size inputs removed; lock and autoplay still write hash
-  lockAspect.addEventListener('change', ()=>{ writeHash({ url: urlIn.value.trim(), mode: coverMode ? 'cover' : 'contain', s: currentTransform.s || null, x: currentTransform.x || 0, y: currentTransform.y || 0, lock: lockAspect.checked, autoplay: autoplayChk.checked, loop: loopChk.checked }); });
-  autoplayChk.addEventListener('change', ()=>{ writeHash({ url: urlIn.value.trim(), mode: coverMode ? 'cover' : 'contain', s: currentTransform.s || null, x: currentTransform.x || 0, y: currentTransform.y || 0, lock: lockAspect.checked, autoplay: !!autoplayChk.checked, loop: loopChk.checked }); });
-  loopChk.addEventListener('change', ()=>{ writeHash({ url: urlIn.value.trim(), mode: coverMode ? 'cover' : 'contain', s: currentTransform.s || null, x: currentTransform.x || 0, y: currentTransform.y || 0, lock: lockAspect.checked, autoplay: autoplayChk.checked, loop: !!loopChk.checked }); });
+  urlIn.addEventListener('keydown', (e)=>{ 
+    if(e.key === 'Enter'){ 
+      const u = urlIn.value.trim();
+      if(u){
+        loadUrl(u);
+        writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked });
+      }
+    } 
+  });
 
-  // enable enter key on input
-  urlIn.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ loadUrl(urlIn.value.trim()); } });
+  // Handle hash changes
+  window.addEventListener('hashchange', ()=>{
+    const s = parseHash();
+    applyStateToUI(s);
+    if(s.url) loadUrl(s.url);
+  });
 
-  // Pan toggle: enable or disable overlay-based pan/zoom interactions
-  try{
-    panToggleBtn.addEventListener('click', ()=>{
-      try{
-        panEnabled = !panEnabled;
-        panToggleBtn.textContent = panEnabled ? 'Pan: On' : 'Pan: Off';
-        if(!panEnabled) try{ detachDirectManipulation(); }catch(e){}
-        else {
-          // if currently injected, attach overlay
-          try{ const wrap = injected.firstElementChild; const contentEl = wrap && wrap.querySelector && wrap.querySelector('iframe,video,img') || (wrap && wrap.firstElementChild); if(contentEl) attachDirectManipulation(contentEl); }catch(e){}
-        }
-      }catch(err){ console.warn('pan toggle handler error', err); }
-    });
-  }catch(e){ console.warn('pan toggle binding failed', e); }
-
-  // make floating draggable via handle
+  // Make floating draggable
   (function(){
     let dragging=false, sx=0, sy=0, ox=0, oy=0;
-    try{
-      handle.addEventListener('pointerdown', (ev)=>{
-        try{
-          dragging=true; handle.setPointerCapture && handle.setPointerCapture(ev.pointerId);
-          sx = ev.clientX; sy = ev.clientY; const r = floating.getBoundingClientRect(); ox = r.left; oy = r.top;
-          floating.style.transition = 'none';
-        }catch(err){ console.warn('handle pointerdown error', err); }
-      });
-    }catch(err){ console.warn('handle binding failed', err); }
-    // pointermove/up don't call preventDefault so can be passive for better scrolling performance
+    handle.addEventListener('pointerdown', (ev)=>{
+      dragging=true; 
+      handle.setPointerCapture && handle.setPointerCapture(ev.pointerId);
+      sx = ev.clientX; sy = ev.clientY; 
+      const r = floating.getBoundingClientRect(); 
+      ox = r.left; oy = r.top;
+      floating.style.transition = 'none';
+    });
     window.addEventListener('pointermove', (ev)=>{
-      if(!dragging) return; const dx = ev.clientX - sx, dy = ev.clientY - sy; floating.style.left = (ox + dx) + 'px'; floating.style.top = (oy + dy) + 'px'; floating.style.transform = 'translate(0,0)';
+      if(!dragging) return; 
+      const dx = ev.clientX - sx, dy = ev.clientY - sy; 
+      floating.style.left = (ox + dx) + 'px'; 
+      floating.style.top = (oy + dy) + 'px'; 
+      floating.style.transform = 'translate(0,0)';
     }, {passive:true});
-    window.addEventListener('pointerup', ()=>{ dragging=false; floating.style.transition = ''; }, {passive:true});
+    window.addEventListener('pointerup', ()=>{ 
+      dragging=false; 
+      floating.style.transition = ''; 
+    }, {passive:true});
   })();
 
-  // Restore focus to input on load
+  // Initial load from hash
+  try{
+    const initial = parseHash();
+    if(Object.keys(initial).length){ 
+      applyStateToUI(initial);
+      if(initial.url) loadUrl(initial.url);
+    }
+  }catch(e){}
+
   urlIn.focus();
-
-  // Expose for debugging
-  window.embedLoader = { loadUrl, injectHtml, injectIframe, sizeInjected, hideFloatingUI, showFloatingUI };
-
 })();
 </script>
 </body>
