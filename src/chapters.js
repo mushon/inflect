@@ -139,8 +139,9 @@ document.addEventListener('DOMContentLoaded', function () {
         label.className = 'chapter-label';
         label.textContent = chapterTitle;
 
-        chapterBtn.addEventListener('click', createScrollHandler(child.id));
-        chapterBtn.addEventListener('dblclick', createDoubleClickHandler(child.id));
+        // Attach handlers to the container so entire area including borders is clickable
+        chapterItem.addEventListener('click', createScrollHandler(child.id));
+        chapterItem.addEventListener('dblclick', createDoubleClickHandler(child.id));
 
         chapterItem.appendChild(chapterBtn);
         chapterItem.appendChild(label);
@@ -182,8 +183,9 @@ document.addEventListener('DOMContentLoaded', function () {
         sectionLabel.className = 'chapter-label';
         sectionLabel.textContent = sectionTitle;
 
-        sectionBtn.addEventListener('click', createScrollHandler(child.id));
-        sectionBtn.addEventListener('dblclick', createDoubleClickHandler(child.id));
+        // Attach handlers to the container so entire area including borders is clickable
+        sectionItem.addEventListener('click', createScrollHandler(child.id));
+        sectionItem.addEventListener('dblclick', createDoubleClickHandler(child.id));
 
         // If contains an H3 or H4, mark this nav item as a timestamp
         if (hasTimestampHeading) {
@@ -503,6 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       
       // Mark all dots as visited, future, or current based on scroll position
+      // Note: 'current' class on sections is now handled by core index.html
       targetPositions.forEach(pos => {
         const dot = pos.dot;
         

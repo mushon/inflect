@@ -19,16 +19,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1px;
+  /* Use transparent border instead of margin for gaps - makes entire area clickable */
+  border-bottom: 1px solid transparent;
 }
 
 /* Longer gap before chapter headings for visual separation */
 .chapter-heading-item {
-  margin-top: 8px;
+  border-top: 8px solid transparent;
 }
 
 .chapter-heading-item:first-child {
-  margin-top: 0;
+  border-top: 0;
 }
 
 .chapter-dot {
@@ -155,10 +156,12 @@
     flex: 1 1 0;
     min-height: 0; /* Allow items to shrink below content size */
     width: 48px; /* Larger hit area */
-    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Override desktop borders/margins - gaps already handled by parent gap property */
+    border: 0;
+    margin: 0;
   }
 
   /* Larger dots on mobile for better visibility */
@@ -206,15 +209,16 @@
     z-index: 1; /* Ensure it's above dots */
   }
 
-  /* Chapter headings: same flex-grow as sections, but with 8px gap before */
+  /* Chapter headings: same flex-grow as sections, but with transparent border for gap */
   #chapter-nav .chapter-item.chapter-heading-item {
     flex: 1 1 0;
+    border-top: 7px solid transparent; /* 8px total gap = 7px + 1px from parent gap */
+    border-bottom: 0;
     margin: 0;
-    margin-top: 7px; /* 8px total gap = 7px + 1px from gap property */
   }
 
   #chapter-nav .chapter-item.chapter-heading-item:first-child {
-    margin-top: 0; /* No extra gap before first chapter */
+    border-top: 0; /* No extra gap before first chapter */
   }
   
   /* Larger dots for chapter headings too */

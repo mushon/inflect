@@ -740,6 +740,73 @@
                 _secs.forEach(s => snapObserver.observe(s));
             } catch(e) { /* swallow */ }
 
+            // Track current section in view and add 'current' class
+            function updateCurrentSection() {
+                try {
+                    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const viewportHeight = window.innerHeight;
+                    const viewportCenter = currentScrollTop + (viewportHeight / 2);
+                    
+                    const allSections = Array.from(document.querySelectorAll('main > section, main > .section'));
+                    if (!allSections.length) return;
+                    
+                    // Build position data for all sections
+                    const sectionPositions = [];
+                    allSections.forEach(section => {
+                        const rect = section.getBoundingClientRect();
+                        const sectionTop = rect.top + currentScrollTop;
+                        sectionPositions.push({
+                            element: section,
+                            top: sectionTop
+                        });
+                    });
+                    
+                    // Find the current section: the one whose top is at or just above viewport center
+                    let currentSection = null;
+                    let bestCandidate = null;
+                    
+                    sectionPositions.forEach(pos => {
+                        if (pos.top <= viewportCenter) {
+                            if (!bestCandidate || pos.top > bestCandidate.top) {
+                                bestCandidate = pos;
+                            }
+                        }
+                    });
+                    
+                    if (bestCandidate) {
+                        currentSection = bestCandidate.element;
+                    } else if (sectionPositions.length > 0) {
+                        currentSection = sectionPositions[0].element;
+                    }
+                    
+                    // Remove 'current' class from all sections and add to current one
+                    allSections.forEach(section => {
+                        section.classList.remove('current');
+                    });
+                    
+                    if (currentSection) {
+                        currentSection.classList.add('current');
+                    }
+                } catch(e) { /* swallow */ }
+            }
+            
+            // Setup scroll tracking
+            let currentSectionUpdateScheduled = false;
+            function scheduleCurrentSectionUpdate() {
+                if (currentSectionUpdateScheduled) return;
+                currentSectionUpdateScheduled = true;
+                requestAnimationFrame(() => {
+                    updateCurrentSection();
+                    currentSectionUpdateScheduled = false;
+                });
+            }
+            
+            // Update on scroll - attach to the scroller element, not window
+            scroller.addEventListener('scroll', scheduleCurrentSectionUpdate, { passive: true });
+            
+            // Initial update
+            scheduleCurrentSectionUpdate();
+
             // Non-passive wheel listener to intercept and flip pages — attach to scroller
             try {
                 // Accumulator for small trackpad deltas: many trackpads emit many
