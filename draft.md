@@ -61,7 +61,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](svg/#opening.svg/-0.6,0.23,2.93/+nibal2023+home)
+[](svg/#opening.svg/-0.23,-0.21,2.11/+nibal2023+home)
 
 בגלל שאני הקטנה, ההורים והאחים שלי תמיד פינקו אותי. הייתה לי תשוקה לחיים.
 
