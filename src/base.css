@@ -40,6 +40,7 @@ main {
     bottom: 0;
     right: 0; /* reserve right-hand column for iframe */
     padding: 4vh 2vw;
+    padding: 4dvh 2vw; /* Dynamic viewport height for mobile browsers */
     overflow-y: auto;
 }
 
@@ -50,15 +51,19 @@ iframe {
     bottom: 0;
     width: 60vw;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
     border: 0;
     background: transparent;
 }
 
 section {
     margin: 6vh auto;
+    margin: 6dvh auto; /* Dynamic viewport height for mobile browsers */
     padding: 5vh 0;
+    padding: 5dvh 0; /* Dynamic viewport height for mobile browsers */
     max-width: 640px;
     min-height: 90vh;
+    min-height: 90dvh; /* Dynamic viewport height for mobile browsers */
 }
 
 section img { max-width: 100%; }
@@ -75,6 +80,17 @@ a { color: #0b66a8; }
 footer { opacity: 0.6; text-align: left; padding: 1rem 0; }
 
 @media (max-width: 1000px) and (orientation: portrait) {
-    iframe { position: fixed; left: 0; width: 100vw; height: 50vh; }
-    main { right: 0; left: 0; padding: 2vh 4vw; }
+    iframe { 
+        position: fixed; 
+        left: 0; 
+        width: 100vw; 
+        height: 50vh;
+        height: 50dvh; /* Dynamic viewport height for mobile browsers */
+    }
+    main { 
+        right: 0; 
+        left: 0; 
+        padding: 2vh 4vw;
+        padding: 2dvh 4vw; /* Dynamic viewport height for mobile browsers */
+    }
 }

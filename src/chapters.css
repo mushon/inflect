@@ -10,8 +10,11 @@
   align-items: flex-end;
   justify-content: space-evenly;
   height: 96vh;
+  height: 96dvh; /* Dynamic viewport height for mobile browsers */
   top: 2vh;
+  top: 2dvh;
   bottom: 2vh;
+  bottom: 2dvh;
 }
 
 .chapter-item {
