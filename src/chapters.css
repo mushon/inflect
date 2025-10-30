@@ -91,6 +91,32 @@
   transform: translateY(-50%) translateX(0);
 }
 
+/* Timestamp items (sections with H3/H4) show labels by default */
+.chapter-item.timestamp .chapter-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Desktop only: smaller timestamp labels by default, full size on hover */
+@media (min-width: 801px) and (hover: hover) and (pointer: fine) {
+  .chapter-item.timestamp .chapter-label {
+    transform: translateY(-50%) translateX(0) scale(0.75);
+    font-size: .75em;
+  }
+
+  /* When any nav item is hovered, hide all timestamp labels */
+  #chapter-nav:hover .chapter-item.timestamp .chapter-label {
+    opacity: 0;
+  }
+
+  /* But show the timestamp label if its own item is hovered, at full size */
+  #chapter-nav .chapter-item.timestamp:hover .chapter-label {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+    font-size: .8em;
+  }
+}
+
 /* small arrow */
 .chapter-label::before {
   content: '';

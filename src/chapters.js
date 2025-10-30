@@ -5,22 +5,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Prefer explicit .subheader containers if present (existing behavior)
     document.querySelectorAll('.subheader').forEach(container => {
-      container.querySelectorAll('h1, h2, h3').forEach(h => headingSet.add(h));
-      const next = container.nextElementSibling;
-      if (next && /H[1-3]/.test(next.tagName)) headingSet.add(next);
+      container.querySelectorAll('h1, h2').forEach(h => headingSet.add(h));
+  const next = container.nextElementSibling;
+  // Only H1/H2 break the timeline into chapters
+  if (next && /H[1-2]/.test(next.tagName)) headingSet.add(next);
     });
 
     // Also include headings that explicitly have class `subheader`
-    document.querySelectorAll('h1.subheader, h2.subheader, h3.subheader').forEach(h => headingSet.add(h));
+    document.querySelectorAll('h1.subheader, h2.subheader').forEach(h => headingSet.add(h));
 
-    // Fallback: include any top-level headings inside <main> (h1-h3).
+    // Fallback: include any top-level headings inside <main> (h1-h2).
     // Some markdown files (like draft.md) place a marker on its own line
     // before a heading; depending on the markdown processor that marker may
     // not end up as a wrapper element. Including headings inside <main>
     // ensures chapters are detected even when `.subheader` isn't present
     // as a wrapper element.
     const main = document.querySelector('main') || document;
-    main.querySelectorAll('h1, h2, h3').forEach(h => headingSet.add(h));
+    main.querySelectorAll('h1, h2').forEach(h => headingSet.add(h));
 
     // Filter out hidden headings and sort by document order
     let headings = Array.from(headingSet).filter(el => el && el.offsetParent !== null);
@@ -65,96 +66,166 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Find all sections in the document
-    const allSections = Array.from(document.querySelectorAll('main section')).filter(s => s.offsetParent !== null);
+    // Get all direct children of main
+    const main = document.querySelector('main');
+    if (!main) return;
     
-    // Ensure all sections have ids
-    allSections.forEach((s, idx) => {
-      if (!s.id || s.id.trim() === '') {
-        s.id = 'section-' + idx;
+    const allMainChildren = Array.from(main.children).filter(el => el.offsetParent !== null);
+    console.log('[chapters] Main direct children:', allMainChildren.length);
+    
+    // Ensure all navigable elements have IDs
+    allMainChildren.forEach((el, idx) => {
+      if (!el.id || el.id.trim() === '') {
+        el.id = 'main-child-' + idx;
       }
     });
-
-    // Map sections to their parent chapters
-    const sectionToChapter = new Map();
-    allSections.forEach(section => {
-      // Find which chapter heading this section belongs to
+    
+    // Map each main child to its parent chapter
+    const childToChapter = new Map();
+    let orphanedChildren = 0;
+    allMainChildren.forEach(child => {
+      // Find which chapter heading this child belongs to
       let chapterHeading = null;
       for (let i = headings.length - 1; i >= 0; i--) {
         const heading = headings[i];
         const headingPos = heading.getBoundingClientRect().top + window.pageYOffset;
-        const sectionPos = section.getBoundingClientRect().top + window.pageYOffset;
-        if (headingPos <= sectionPos) {
+        const childPos = child.getBoundingClientRect().top + window.pageYOffset;
+        if (headingPos <= childPos) {
           chapterHeading = heading;
           break;
         }
       }
       if (chapterHeading) {
-        sectionToChapter.set(section.id, chapterHeading.id);
+        childToChapter.set(child.id, chapterHeading.id);
+      } else {
+        orphanedChildren++;
+        console.log('[chapters] Orphaned child (no chapter):', child.id, child.tagName, child.className);
       }
     });
+    console.log('[chapters] Total orphaned children:', orphanedChildren);
 
     clearNav();
     const nav = document.createElement('nav');
     nav.id = 'chapter-nav';
     nav.setAttribute('aria-label', 'Chapters and Sections');
 
-    // Build chapter items with their sections
-    headings.forEach((h, chapterIdx) => {
-      const chapterTitle = h.textContent.trim();
+    let navItemCount = 0;
+    
+    // Build nav items for all main children in order
+    allMainChildren.forEach(child => {
+      navItemCount++;
       
-      // Create chapter heading button
-      const chapterItem = document.createElement('div');
-      chapterItem.className = 'chapter-item chapter-heading-item';
-      chapterItem.dataset.chapterId = h.id;
+      // Check if this child is a heading or contains a heading
+      let isHeading = /^H[1-2]$/.test(child.tagName);
+      let headingElement = isHeading ? child : child.querySelector('h1, h2');
+      
+      if (headingElement && headings.includes(headingElement)) {
+        // This is a chapter heading
+        const chapterTitle = headingElement.textContent.trim();
+        console.log('[chapters] Creating nav item for chapter:', chapterTitle, '| target ID:', child.id);
+        
+        const chapterItem = document.createElement('div');
+        chapterItem.className = 'chapter-item chapter-heading-item';
+        chapterItem.dataset.chapterId = headingElement.id;
 
-      const chapterBtn = document.createElement('button');
-      chapterBtn.className = 'chapter-dot chapter-heading-dot';
-      chapterBtn.type = 'button';
-      chapterBtn.setAttribute('aria-label', chapterTitle);
-      chapterBtn.dataset.target = h.id;
-      chapterBtn.dataset.type = 'chapter';
+        const chapterBtn = document.createElement('button');
+        chapterBtn.className = 'chapter-dot chapter-heading-dot';
+        chapterBtn.type = 'button';
+        chapterBtn.setAttribute('aria-label', chapterTitle);
+        chapterBtn.dataset.target = child.id;  // Points to the main child (container or heading itself)
+        chapterBtn.dataset.type = 'chapter';
 
-      const label = document.createElement('span');
-      label.className = 'chapter-label';
-      label.textContent = chapterTitle;
+        const label = document.createElement('span');
+        label.className = 'chapter-label';
+        label.textContent = chapterTitle;
 
-      chapterBtn.addEventListener('click', createScrollHandler(h.id));
-      chapterBtn.addEventListener('dblclick', createDoubleClickHandler(h.id));
+        chapterBtn.addEventListener('click', createScrollHandler(child.id));
+        chapterBtn.addEventListener('dblclick', createDoubleClickHandler(child.id));
 
-      chapterItem.appendChild(chapterBtn);
-      chapterItem.appendChild(label);
-      nav.appendChild(chapterItem);
-
-      // Find and add sections for this chapter
-      const chapterSections = allSections.filter(s => sectionToChapter.get(s.id) === h.id);
-      chapterSections.forEach(section => {
+        chapterItem.appendChild(chapterBtn);
+        chapterItem.appendChild(label);
+        nav.appendChild(chapterItem);
+      } else {
+        // This is a regular section or other content
+        const chapterId = childToChapter.get(child.id);
+        const chapterHeading = chapterId ? headings.find(h => h.id === chapterId) : null;
+        const chapterTitle = chapterHeading ? chapterHeading.textContent.trim() : 'Section';
+        
+        console.log('[chapters] Creating nav item for child:', child.id);
+        
         const sectionItem = document.createElement('div');
         sectionItem.className = 'chapter-item section-item';
-        sectionItem.dataset.chapterId = h.id;
+        if (chapterId) sectionItem.dataset.chapterId = chapterId;
 
         const sectionBtn = document.createElement('button');
         sectionBtn.className = 'chapter-dot section-dot';
         sectionBtn.type = 'button';
-        sectionBtn.setAttribute('aria-label', chapterTitle);
-        sectionBtn.dataset.target = section.id;
+        
+        // Prefer an H3/H4 inside the child as the label if available; fallback to chapter title
+        let sectionTitle = chapterTitle;
+        let hasTimestampHeading = false;
+        try {
+          const hh = child.querySelector && child.querySelector('h3, h4');
+          if (hh) {
+            hasTimestampHeading = true;
+            const t = (hh.textContent || '').trim();
+            if (t) sectionTitle = t;
+          }
+        } catch (e) { /* swallow */ }
+        
+        sectionBtn.setAttribute('aria-label', sectionTitle);
+        sectionBtn.dataset.target = child.id;
         sectionBtn.dataset.type = 'section';
         
-        // Add tooltip label for sections showing the chapter name
+        // Add tooltip label
         const sectionLabel = document.createElement('span');
         sectionLabel.className = 'chapter-label';
-        sectionLabel.textContent = chapterTitle;
+        sectionLabel.textContent = sectionTitle;
 
-        sectionBtn.addEventListener('click', createScrollHandler(section.id));
-        sectionBtn.addEventListener('dblclick', createDoubleClickHandler(section.id));
+        sectionBtn.addEventListener('click', createScrollHandler(child.id));
+        sectionBtn.addEventListener('dblclick', createDoubleClickHandler(child.id));
+
+        // If contains an H3 or H4, mark this nav item as a timestamp
+        if (hasTimestampHeading) {
+          sectionItem.classList.add('timestamp');
+        }
 
         sectionItem.appendChild(sectionBtn);
         sectionItem.appendChild(sectionLabel);
         nav.appendChild(sectionItem);
-      });
+      }
     });
 
+    console.log('[chapters] FINAL COUNT - Main children:', allMainChildren.length, '| Nav items created:', navItemCount);
+
     document.body.appendChild(nav);
+    
+    // Diagnostic: Count actual children
+    const mainElement = document.querySelector('main');
+    const mainChildren = mainElement ? mainElement.children.length : 0;
+    const navChildren = nav.children.length;
+    
+    console.log('[chapters] DIAGNOSTIC - main.children.length:', mainChildren, '| nav.children.length:', navChildren);
+    
+    if (mainElement) {
+      const mainChildTypes = {};
+      Array.from(mainElement.children).forEach(child => {
+        const key = child.tagName + (child.className ? '.' + child.className.split(' ')[0] : '');
+        mainChildTypes[key] = (mainChildTypes[key] || 0) + 1;
+      });
+      console.log('[chapters] Main child types:', mainChildTypes);
+    }
+    
+    const navChildTypes = {};
+    Array.from(nav.children).forEach(child => {
+      const key = child.className.split(' ')[0] || 'unknown';
+      navChildTypes[key] = (navChildTypes[key] || 0) + 1;
+    });
+    console.log('[chapters] Nav child types:', navChildTypes);
+    
+    if (mainChildren !== navChildren) {
+      console.error('[chapters] MISMATCH! Difference:', navChildren - mainChildren);
+    }
 
     // Mobile: add a full-height transparent rail that captures vertical swipes.
     // As the finger moves, we highlight the closest item and show its label.
@@ -165,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const rail = document.createElement('div');
         rail.className = 'nav-touch-rail';
         nav.appendChild(rail);
+        console.log('[chapters] Added touch rail to nav (adds 1 extra child)');
 
         const items = Array.from(nav.querySelectorAll('.chapter-item'));
         let centers = [];
@@ -384,7 +456,10 @@ document.addEventListener('DOMContentLoaded', function () {
       allDots.forEach(dot => {
         const targetId = dot.dataset.target;
         const target = document.getElementById(targetId);
-        if (!target) return;
+        if (!target) {
+          console.warn('[chapters] Target not found for dot:', targetId);
+          return;
+        }
         
         const rect = target.getBoundingClientRect();
         const targetTop = rect.top + currentScrollTop;
@@ -397,16 +472,35 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
       
-      // Find which section is closest to viewport center (the "current" one)
+      // Find the current section: the one whose top is at or just above viewport center
+      // (or closest to it if we're between sections)
       let currentTargetId = null;
-      let minDist = Infinity;
+      let bestCandidate = null;
       
       targetPositions.forEach(pos => {
-        if (pos.distFromCenter < minDist) {
-          minDist = pos.distFromCenter;
-          currentTargetId = pos.targetId;
+        // If this element's top is at or above the viewport center
+        if (pos.top <= viewportCenter) {
+          // It's a candidate. Pick the one closest to (but not past) the center
+          if (!bestCandidate || pos.top > bestCandidate.top) {
+            bestCandidate = pos;
+          }
         }
       });
+      
+      // If we found a candidate at/above center, use it
+      if (bestCandidate) {
+        currentTargetId = bestCandidate.targetId;
+      } else {
+        // We're above all sections (e.g., at page top), use the first one
+        if (targetPositions.length > 0) {
+          currentTargetId = targetPositions[0].targetId;
+        }
+      }
+      
+      // Debug: log the current target
+      if (window.__chaptersDebug) {
+        console.log('[chapters] Active item:', currentTargetId, '| Viewport center:', viewportCenter);
+      }
       
       // Mark all dots as visited, future, or current based on scroll position
       targetPositions.forEach(pos => {
