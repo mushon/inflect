@@ -12,7 +12,8 @@
     #canvas{position:fixed;inset:0;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden}
     #injected{width:100%;height:100%;}
     #injected.cover{position:fixed;top:0;left:50%;transform:translateX(-50%);width:177vh;height:100vh;overflow:hidden;}
-    
+    #injected.auto{display:flex;align-items:center;justify-content:center;}
+    #injected.auto .plyr__video-embed{width: 57vh;}
     /* Floating UI */
     #floating{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:320px}
     #ui-handle{background:var(--ui-bg);padding:8px;border-radius:10px;color:var(--ui-fg);cursor:grab;display:flex;align-items:center;gap:8px;touch-action:none}
@@ -46,6 +47,7 @@
       <label style="display:flex;align-items:center;gap:6px"><input id="autoplay" type="checkbox"> autoplay</label>
       <label style="display:flex;align-items:center;gap:6px"><input id="loop" type="checkbox"> loop</label>
       <label style="display:flex;align-items:center;gap:6px"><input id="cover" type="checkbox"> cover</label>
+      <label style="display:flex;align-items:center;gap:6px"><input id="auto" type="checkbox"> auto</label>
       <button id="clear" class="secondary">Clear</button>
     </div>
   </div>
@@ -61,6 +63,7 @@
   const autoplayChk = document.getElementById('autoplay');
   const loopChk = document.getElementById('loop');
   const coverChk = document.getElementById('cover');
+  const autoChk = document.getElementById('auto');
   
   let playerAdapter = null;
 
@@ -83,6 +86,7 @@
             if(f === 'autoplay') out.autoplay = true;
             else if(f === 'loop') out.loop = true;
             else if(f === 'cover') out.cover = true;
+            else if(f === 'auto') out.auto = true;
           }
         }
       }
@@ -93,11 +97,13 @@
         else if(k === 'a' || k === 'autoplay') out.autoplay = (v === '1' || v === 'true' || v === '');
         else if(k === 'loop') out.loop = (v === '1' || v === 'true' || v === '');
         else if(k === 'cover') out.cover = (v === '1' || v === 'true' || v === '');
+        else if(k === 'auto') out.auto = (v === '1' || v === 'true' || v === '');
       }
 
       if(typeof out.autoplay !== 'undefined') out.autoplay = !!out.autoplay;
       if(typeof out.loop !== 'undefined') out.loop = !!out.loop;
       if(typeof out.cover !== 'undefined') out.cover = !!out.cover;
+      if(typeof out.auto !== 'undefined') out.auto = !!out.auto;
       
       return out;
     }catch(e){ return {}; }
@@ -112,6 +118,7 @@
       if(state.autoplay) flags.push('autoplay');
       if(state.loop) flags.push('loop');
       if(state.cover) flags.push('cover');
+      if(state.auto) flags.push('auto');
       if(flags.length) parts.push(flags.join(','));
 
       const newHash = parts.join('/');
@@ -144,6 +151,7 @@
     if(typeof state.autoplay !== 'undefined') autoplayChk.checked = !!state.autoplay;
     if(typeof state.loop !== 'undefined') loopChk.checked = !!state.loop;
     if(typeof state.cover !== 'undefined') coverChk.checked = !!state.cover;
+    if(typeof state.auto !== 'undefined') autoChk.checked = !!state.auto;
   }
 
   // --- Player loading -----------------------------------------------------
@@ -180,11 +188,12 @@
         const st = parseHash();
         console.log('[embed] Player ready, state:', st);
         
-        // Toggle cover class
+        // Toggle classes based on mode
+        injected.classList.remove('cover', 'auto');
         if(st.cover){
           injected.classList.add('cover');
-        } else {
-          injected.classList.remove('cover');
+        } else if(st.auto){
+          injected.classList.add('auto');
         }
         
         // Apply player state
@@ -259,7 +268,7 @@
     const u = urlIn.value.trim();
     if(!u) return;
     loadUrl(u);
-    writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked });
+    writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked, auto: autoChk.checked });
   });
 
   clearBtn.addEventListener('click', ()=>{
@@ -273,18 +282,26 @@
   });
 
   autoplayChk.addEventListener('change', ()=>{ 
-    writeHash({ url: urlIn.value.trim(), autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked }); 
+    writeHash({ url: urlIn.value.trim(), autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked, auto: autoChk.checked }); 
   });
   
   loopChk.addEventListener('change', ()=>{ 
-    writeHash({ url: urlIn.value.trim(), autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked }); 
+    writeHash({ url: urlIn.value.trim(), autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked, auto: autoChk.checked }); 
   });
 
   coverChk.addEventListener('change', ()=>{
     const u = urlIn.value.trim();
     if(u){
       loadUrl(u);
-      writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked });
+      writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked, auto: autoChk.checked });
+    }
+  });
+
+  autoChk.addEventListener('change', ()=>{
+    const u = urlIn.value.trim();
+    if(u){
+      loadUrl(u);
+      writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked, auto: autoChk.checked });
     }
   });
 
@@ -293,7 +310,7 @@
       const u = urlIn.value.trim();
       if(u){
         loadUrl(u);
-        writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked });
+        writeHash({ url: u, autoplay: autoplayChk.checked, loop: loopChk.checked, cover: coverChk.checked, auto: autoChk.checked });
       }
     } 
   });

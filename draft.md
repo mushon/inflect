@@ -63,13 +63,13 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130641184/autoplay,loop)
+[](embed/#vimeo.com%2F1130641184/autoplay,loop,cover)
 
 אחרי התיכון, המשכתי ללימודי אנגלית ותרגום באוניברסיטת אל-אזהר בעיר עזה.
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130634353/autoplay,loop)
+[](embed/#vimeo.com%2F1130634353/autoplay,loop,cover)
 
 בשנה האחרונה באוניברסיטה הכרתי את אחמד. הרגשתי שהוא דומה לי, שהוא מבין אותי. 
 
@@ -77,7 +77,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130834125%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130834125%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 
 בספטמבר 2022 עברנו לגור ליד המשפחה שלי בג׳אבליא. היו לנו חיים מאושרים, מלאים במשפחה ובאהבה. 
 
@@ -85,7 +85,7 @@ css: src/theme.css
 
 
 {.meta}
-[](embed/#vimeo.com%2F1130634480%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130634480%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 שנה אחרי החתונה, בספטמבר 2023, נולדת התינוקת הראשונה שלהם, ריתא. 
 
 חמישה ימים לאחר לידתה, אחמד מקבל היתר עבודה בישראל ומתחיל לעבוד בבניין.
@@ -195,7 +195,7 @@ css: src/theme.css
 
 
 {.meta thumb}
-[](embed/#vimeo.com%2F1131608820%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1131608820/autoplay,loop,auto)
 
 `על אף האיחוד עם אחמד, ניבאל מתקשה להסתגל לחיים באוהל ברפיח. הצפיפות, החוסר במים ומזון כמו גם תנאי הסניטציה הירודים והיעדר הפרטיות הפכו את החיים במחנות העקורים לבלתי נסבלים, במיוחד לנשים ונערות.`
 
@@ -318,13 +318,13 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1129846713%3Fshare%3Dcopy/autoplay,loop)
+[](embed/#vimeo.com%2F1129846713%3Fshare%3Dcopy/autoplay,loop,auto)
 
 החיים באוהל באל-מוואסי היו קשים מאוד. השירותים היו פרימיטיביים ולא יכולתי להשתמש בהם לבד בגלל הפציעה. הביך אותי מאוד לבקש בכל פעם עזרה. הבת של השכנים, נערה חכמה ורגישה בת 16, ריחמה עליי והגיעה בכל יום לעזור לי ולטפל בי ובריתא במשך היום.
 
 
 {.testimony typewriter}
-[](img/#nibal_after_amputation.jpg)
+[](img/#0,0,0,0&100&&&nibal_after_amputation.jpg&0)
 
 התקשיתי לקבל את הגוף החדש שלי. 
 
@@ -332,19 +332,19 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1130598335%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130598335%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 
 הרגשתי שגם ריתא בקושי מזהה אותי. פחדתי שהיא משתנה, שהיא מאבדת משמחת החיים ומהחיוניות שלה.
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1131602000%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1131602000%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 
 אבל אחמד היה שם בשבילי. הוא אמר לי, ״אני אהיה הידיים שלך, העיקר שאת וריתא תהיו בטוב״.
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1131630900%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1131630900%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 
 חלמתי שנחזור לצפון הרצועה, לחיק המשפחה שלי, לימים שבהם כולנו היינו ביחד. כל-כך התגעגעתי אליהם. 
 
@@ -368,7 +368,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1129854927%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1129854927%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,auto)
 
 המשפחה קיבלה אותי בחיבוקים, שירים ובכי. בלילות נפגשנו כל האחים בבית ההורים שלי.
 
@@ -386,29 +386,33 @@ css: src/theme.css
 
 
 {.meta}
+[](tbd/#map-of-path)
 אחרי כחודש של מנוחה והחלמה בבית הוריה, אחמד מבקש מניבאל שתשוב דרומה. 
 
 ניבאל נענית לבקשתו, וחוזרת עם ריתא לאוהל ב״איזור ההומניטרי״ באל-מוואסי.
 
 
 {.meta}
-[](embed/#vimeo.com%2F1129871187%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1129871187%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,auto)
 במהלך התקופה הזו, ניבאל מתקשה להסתגל לחיים ללא ידיים בתנאים הבלתי-אפשריים באוהל. אחמד, מצידו, מתמודד עם קשיים משלו.
 
 מערכת היחסים שלהם חווה טלטלה.
 
 
 {.testimony typewriter}
+[](tbd/#??)
 מאז שאחמד שוחרר מהמעצר בישראל הוא היה נראה לי מוטרד ולחוץ. משהו בו השתנה.
 
 במובן מסוים, הרגשתי, הוא איבד שם חלק מעצמו.
 
 
 {.meta}
+[](tbd/#???)
 ניבאל מתארת תסכול מתמשך סביב הניסיון להשיג מים ואוכל לה ולריתא במחנה העקורים, תסכול שאחמד מפנה לעתים כלפיה. 
 
 
 {.testimony typewriter}
+[](tbd/#????)
 בהתחלה הוא מאוד תמך בי. אבל עם הזמן, הרגשתי שהוא נאלץ לטפל בי מתוך רחמים.
 
 בתוך כל הקשיים, ניסיתי להתמקד בריתא. היא הייתה הדבר החשוב ביותר בשבילי, ועשיתי מה שיכולתי כדי להתגבר על המתיחות ביני לבין אחמד ולטפל בה.
@@ -449,14 +453,14 @@ css: src/theme.css
 
 
 {.meta}
-[](embed/#vimeo.com%2F1130637017%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1130637017%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 בסוף אוגוסט 2025, כוחות הצבא הישראלי נכנסים לג'באליא ומתקדמים אל עבר השכונה של ניבאל. 
 
 ניבאל מתחילה לשמוע הפצצות בסביבתה. בשלב מסוים, אחד מהפגזים פוגע בבית המשפחה.
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1129867099%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1129867099%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,cover)
 
 שמענו צעקות בחוץ וראינו אנשים רצים. אמרו לנו שהצבא הישראלי ציווה לפנות את האזור תוך רבע שעה. יצאנו מהבית מבוהלים בלי לקחת איתנו כמעט כלום. שכחתי בבית את התעודות שלנו, הבגדים שלנו, הכול. אבל הצלחנו להימלט בזמן. 
 
@@ -496,7 +500,7 @@ css: src/theme.css
 
 
 {.testimony typewriter}
-[](embed/#vimeo.com%2F1129867912%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop)
+[](embed/#vimeo.com%2F1129867912%3Fshare%3Dcopy%26fl%3Dsv%26fe%3Dci/autoplay,loop,auto)
 
 הייתי מותשת מהעקירה החוזרת ונשנית, וחששתי שריתא ואני לא נצליח להסתגל שוב לחיים באוהל.
 הצבא הישראלי מפזר כל הזמן כרוזים שמורים לנו להתפנות, ואנחנו חיים בחוסר אונים ובפחד. החיים שלנו נהרסו, הם הפכו למוות מתמשך. חיי השפלה ועלבון, בלי בית, בלי טיפת יציבות.
