@@ -106,7 +106,7 @@ section.thumb > a{
     display: block;
     background: #000 url(assets/report_thumb.png) no-repeat right bottom;
     border-right: #FA5F5F 8px solid;
-    padding: 56px 220px 0 0;
+    padding: 48px 220px 0 0;
     color:#FA5F5F;
     height: 80px;
     cursor: pointer;
@@ -116,13 +116,28 @@ section.thumb > a{
 }
 
 section.thumb > a:hover{
-    background: #FA5F5F url(assets/report_thumb_hover.png) no-repeat right bottom;
+    background: #FA5F5F url(assets/report_thumb-hover.png) no-repeat right bottom;
     color: #000;
 }
 
 section.thumb > a strong{
     display: block;
     color: #fff;
+}
+
+section.thumb.gofundme p{
+    border-right: #02A85C 8px solid;
+}
+
+section.thumb.gofundme > a{
+    background: #000 url(assets/gofundme_thumb.png) no-repeat right bottom;
+    border-right: #02A85C 8px solid;
+    color:#02A85C;
+}
+
+section.thumb.gofundme > a:hover{
+    background: #02A85C url(assets/gofundme_thumb-hover.png) no-repeat right bottom;
+    color: #000;
 }
 
 section.testimony {
