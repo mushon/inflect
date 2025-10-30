@@ -207,7 +207,7 @@ p {
 
 /* Ensure headings and other prominent text also get the stronger shadow */
 h1, h2, h3, h4, p, .typewriter, section.testimony p {
-    text-shadow: 0 1px 0 rgba(0,0,0,0.85), 0 2px 4px rgba(0,0,0,0.55), 0 6px 16px rgba(0,0,0,0.35);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.85), 0 2px 4px rgba(0,0,0,0.75), 0 6px 16px rgba(0,0,0,0.5);
     -webkit-text-stroke: 0.4px rgba(0,0,0,0.55);
 }
 
